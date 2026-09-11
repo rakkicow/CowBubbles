@@ -18,9 +18,3 @@ A fork of [OpenBubbles](https://github.com/OpenBubbles/openbubbles-app) with a r
 ## Status
 
 very very Alpha release! Tested on 1 phone lol. Please report bugs!!
-
-## Credit
-
-All of the messaging, sync and Apple-service work is [OpenBubbles](https://github.com/OpenBubbles/openbubbles-app) and [rustpush](https://github.com/TaeHagen/rustpush). This fork only touches the interface.
-
-Licensed Apache 2.0, as upstream. `rustpush/` is SSPL with an exception granted to OpenBubbles specifically.
