@@ -1,36 +1,43 @@
-# OpenBubbles
+# CowBubbles
 
-OpenBubbles is an open-source and cross-platform ecosystem of apps aimed to bring Apple platform services to Android and Windows! With OpenBubbles, you'll be able to send messages, media, and much more to your friends and family.
+A fork of [OpenBubbles](https://github.com/OpenBubbles/openbubbles-app) with a rebuilt interface: liquid glass surfaces, per-conversation colour, and a now-playing engine that themes the app around whatever you are listening to.
 
-**Please note that OpenBubbles requires access to a Mac and an Apple ID to function!
+Everything OpenBubbles does, it still does. This is the same messaging core wearing a different app.
 
-Key Features:
+## What's different
 
-- Send/receive emoji reactions 
-- Send formatted messages (bold, italic, etc)
-- Edit messages
-- Unsend messages 
-- Call your friends on FaceTime
-- Answer calls from your friends on FaceTime
-- See friends' locations on FindMy
-- Join and Sync iCloud Shared Albums
-- See typing indicators
-- Receive stickers
-- Create and manage group chats
-- Add an icon to personalize your group chat 
-- Send images and videos
-- Forward SMS and MMS to/from connected Macs or other devices with OpenBubbles 
+**Music theming.** A media listener watches whatever is playing and hands the track to the UI. The conversation background is the album art itself, three copies of a 28px thumbnail rotating and drifting under a fragment shader, which is how the colour keeps moving without a full-screen blur every frame. Outgoing bubbles take the cover's most saturated colour.
 
-If you need help setting up the app, have any issues or feature requests, or just want to come hang out, feel free to join our Discord, linked below! We hope you enjoy using the app!
+**Lyrics.** Synced lyrics from LRCLIB. A chip under the header shows the current line. Hold it and a panel peeks open; keep holding and pull down for the full screen. Lines are centred, the current one swells, the rest go soft. Instrumental breaks get three dots that fill across the length of the break.
 
-## Useful links
+**Colour as information.** Every conversation gets a colour from its handle, quantised onto a 12-step OKLCH wheel so no two threads in a list land a few degrees apart. Unread chats fill with their colour, read ones go flat.
 
-* Our Website: [here](https://openbubbles.app)
-* Discord: [here](https://discord.gg/98fWS4AQqN)!
-    - We highly encourage users to join to get in direct communication with the developers and community
-* GitHub: [here](https://github.com/OpenBubbles)
-    - Please submit any issues with the app here so we can properly track them! Remember to search before opening a ticket :)
+**Cow theming.** Circular avatars, a cow-spot silhouette for groups, and a redacted mode that swaps names for cow puns and messages for cow riddles.
 
-## Getting Started
+## Screens
 
-[Quickstart](https://openbubbles.app/quickstart.html)
+| Music theming | iMessage apps |
+|---|---|
+| ![themes](docs/media/themes.gif) | ![games](docs/media/games.gif) |
+
+## Status
+
+Alpha. Android only, arm64. Built and tested on a Galaxy S24.
+
+The APK on the releases page is signed with a personal key, so it installs alongside a stock OpenBubbles install rather than updating it.
+
+## Building
+
+Standard Flutter build against the `cow` flavor:
+
+```
+flutter build apk --release --flavor cow --target-platform android-arm64
+```
+
+Note that a build from source cannot authenticate with Apple: the fairplay certificates and the Absinthe validation code are withheld upstream and ship as stubs. That limitation is inherited from OpenBubbles and is not something this fork changes.
+
+## Credit
+
+All of the messaging, sync and Apple-service work is [OpenBubbles](https://github.com/OpenBubbles/openbubbles-app) and [rustpush](https://github.com/TaeHagen/rustpush). This fork only touches the interface.
+
+Licensed Apache 2.0, as upstream. `rustpush/` is SSPL with an exception granted to OpenBubbles specifically.
