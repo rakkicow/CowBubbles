@@ -135,7 +135,7 @@ class ConversationList extends CustomStateful<ConversationListController> {
                         ? "Unknown"
                         : showDeletedMessages
                             ? "Recently Deleted"
-                            : "Messages"));
+                            : "CowMessages"));
 
   @override
   State<StatefulWidget> createState() => _ConversationListState();
@@ -151,7 +151,7 @@ class _ConversationListState extends CustomState<ConversationList, void, Convers
             ? "Unknown"
             : controller.showDeletedMessages
               ? "Recently Deleted"
-              : "Messages";
+              : "CowMessages";
 
     if (!ss.settings.reachedConversationList.value) {
       Timer? timer;

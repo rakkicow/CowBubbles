@@ -78,7 +78,7 @@ class _MaterialConversationListState extends OptimizedState<MaterialConversation
               ? ConversationListFAB(parentController: controller)
               : const SizedBox.shrink(),
           body: Obx(() {
-            final _chats = showDeleted ? deletedChats : chats.chats.archivedHelper(showArchived).unknownSendersHelper(showUnknown);
+            final _chats = showDeleted ? deletedChats : chats.chats.archivedHelper(showArchived).unknownSendersHelper(showUnknown).withoutEmptyHelper();
 
             if (!chats.loadedChatBatch.value || _chats.isEmpty) {
               return Center(

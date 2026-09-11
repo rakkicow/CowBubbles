@@ -17,7 +17,7 @@ import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:dpad/dpad.dart';
-import 'package:faker/faker.dart';
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -412,7 +412,7 @@ class _ChatTitleState extends CustomState<ChatTitle, void, ConversationTileContr
       final hideInfo = ss.settings.redactedMode.value && ss.settings.hideContactInfo.value;
       String _title = title;
       if (hideInfo) {
-        _title = controller.chat.participants.length > 1 ? "Group Chat" : controller.chat.participants[0].fakeName;
+        _title = controller.chat.participants.length > 1 ? CowRedact.herd(controller.chat.guid) : controller.chat.participants[0].fakeName;
       }
 
       return RichText(
@@ -439,7 +439,7 @@ class ChatSubtitle extends CustomStateful<ConversationTileController> {
 
 class _ChatSubtitleState extends CustomState<ChatSubtitle, void, ConversationTileController> {
   String subtitle = "Unknown";
-  String fakeText = faker.lorem.words(1).join(" ");
+  String fakeText = CowRedact.text("moo", 1);
   StreamSubscription? sub;
   String? cachedLatestMessageGuid = "";
   DateTime? cachedDateCreated;
@@ -460,7 +460,7 @@ class _ChatSubtitleState extends CustomState<ChatSubtitle, void, ConversationTil
     isFromMe = controller.chat.latestMessage.isFromMe!;
     isDelivered = controller.chat.isGroup || !isFromMe || controller.chat.latestMessage.dateDelivered != null
         || controller.chat.latestMessage.dateRead != null;
-    fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+    fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
     // run query after render has completed
     if (!kIsWeb) {
       updateObx(() {
@@ -482,7 +482,7 @@ class _ChatSubtitleState extends CustomState<ChatSubtitle, void, ConversationTil
             if (newSubtitle != subtitle) {
               setState(() {
                 subtitle = newSubtitle;
-                fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+                fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
               });
             }
           } else if (!controller.chat.isGroup
@@ -505,7 +505,7 @@ class _ChatSubtitleState extends CustomState<ChatSubtitle, void, ConversationTil
           if (newSubtitle != subtitle) {
             setState(() {
               subtitle = newSubtitle;
-              fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+              fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
             });
           }
         }
@@ -520,7 +520,7 @@ class _ChatSubtitleState extends CustomState<ChatSubtitle, void, ConversationTil
             if (newSubtitle != subtitle) {
               setState(() {
                 subtitle = newSubtitle;
-                fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+                fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
               });
             }
           } else if (!controller.chat.isGroup

@@ -11,6 +11,43 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
+
+/// round glass header button, no backdrop blur
+class _HeaderGlassButton extends StatelessWidget {
+  const _HeaderGlassButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+    this.focusNode,
+    this.size = 20,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final String label;
+  final FocusNode? focusNode;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = PressScale(
+      onTap: onTap,
+      scale: 0.9,
+      semanticLabel: label,
+      child: GlassFill(
+        radius: GlassTokens.capsule,
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Icon(icon, color: context.theme.colorScheme.onSurface, size: size),
+        ),
+      ),
+    );
+    return focusNode == null ? button : Focus(focusNode: focusNode, child: button);
+  }
+}
 
 class CupertinoHeader extends StatelessWidget {
   const CupertinoHeader({Key? key, required this.controller});
@@ -32,18 +69,36 @@ class CupertinoHeader extends StatelessWidget {
         child: Container(
           margin: EdgeInsets.only(
             top: topMargin,
-            left: 20,
-            right: 20,
+            left: Space.md,
+            right: Space.md,
             bottom: 5,
           ),
-          child: Obx(() {
+          // glass panel
+          child: Glass(
+            radius: GlassTokens.panel,
+            padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.md, Space.md),
+            child: Obx(() {
             ns.listener.value;
             return Row(
               mainAxisAlignment: ns.isAvatarOnly(context) ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 if (!ns.isAvatarOnly(context))
                   Expanded(
-                    child: HeaderText(controller: controller),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: Text(
+                        controller.showArchivedChats
+                            ? "Archive"
+                            : controller.showUnknownSenders
+                                ? "Unknown Senders"
+                                : controller.showDeletedMessages
+                                    ? "Recently Deleted"
+                                    : "CowMessages",
+                        style: CowType.display(context).copyWith(fontSize: 30),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
                 if (ns.isAvatarOnly(context))
                   Material(
@@ -60,67 +115,41 @@ class CupertinoHeader extends StatelessWidget {
                     children: [
                       SyncIndicator(size: 16),
                       const SizedBox(width: 10.0),
-                      ClipOval(
-                        child: Material(
-                          color: context.theme.colorScheme.properSurface, // button color
-                          child: SizedBox(
-                            width: 30,
-                            height: 30,
-                            child: InkWell(
-                              child: Icon(CupertinoIcons.search, color: context.theme.colorScheme.properOnSurface, size: 18),
-                              onTap: () {
-                                ns.pushLeft(context, SearchView());
-                              },
-                            ),
-                          ),
-                        ),
+                      _HeaderGlassButton(
+                        icon: CupertinoIcons.search,
+                        size: 18,
+                        label: "Search",
+                        onTap: () {
+                          ns.pushLeft(context, SearchView());
+                        },
                       ),
                       const SizedBox(width: 10.0),
                       if (ss.settings.moveChatCreatorToHeader.value)
-                        ClipOval(
-                          child: Material(
-                            color: context.theme.colorScheme.properSurface, // button color
-                            child: CallbackShortcuts(
-                              bindings: {
-                                const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
-                                  if (!FocusScope.of(context).focusInDirection(TraversalDirection.left)) {
-                                    FocusScope.of(context).previousFocus();
-                                  }
-                                },
-                                const SingleActivator(LogicalKeyboardKey.enter): () => controller.openNewChatCreator(context),
-                                const SingleActivator(LogicalKeyboardKey.select): () => controller.openNewChatCreator(context),
-                                const SingleActivator(LogicalKeyboardKey.space): () => controller.openNewChatCreator(context),
-                              },
-                              child: InkWell(
-                                focusNode: controller.newMessageFocusNode,
-                                child: SizedBox(
-                                  width: 30,
-                                  height: 30,
-                                  child: Icon(
-                                    CupertinoIcons.pencil,
-                                    color: context.theme.colorScheme.properOnSurface,
-                                    size: 20,
-                                  ),
-                                ),
-                                onTap: () => controller.openNewChatCreator(context),
-                              ),
-                            ),
+                        CallbackShortcuts(
+                          bindings: {
+                            const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+                              if (!FocusScope.of(context).focusInDirection(TraversalDirection.left)) {
+                                FocusScope.of(context).previousFocus();
+                              }
+                            },
+                            const SingleActivator(LogicalKeyboardKey.enter): () => controller.openNewChatCreator(context),
+                            const SingleActivator(LogicalKeyboardKey.select): () => controller.openNewChatCreator(context),
+                            const SingleActivator(LogicalKeyboardKey.space): () => controller.openNewChatCreator(context),
+                          },
+                          child: _HeaderGlassButton(
+                            icon: CupertinoIcons.pencil,
+                            label: "New message",
+                            focusNode: controller.newMessageFocusNode,
+                            onTap: () => controller.openNewChatCreator(context),
                           ),
                         ),
                       if (ss.settings.moveChatCreatorToHeader.value && ss.settings.cameraFAB.value && !kIsWeb && !kIsDesktop)
                         const SizedBox(width: 10.0),
                       if (ss.settings.moveChatCreatorToHeader.value && ss.settings.cameraFAB.value && !kIsWeb && !kIsDesktop)
-                        ClipOval(
-                          child: Material(
-                            color: context.theme.colorScheme.properSurface, // button color
-                            child: InkWell(
-                                child: SizedBox(
-                                  width: 30,
-                                  height: 30,
-                                  child: Icon(CupertinoIcons.camera, color: context.theme.colorScheme.properOnSurface, size: 20),
-                                ),
-                                onTap: () => controller.openCamera(context)),
-                          ),
+                        _HeaderGlassButton(
+                          icon: CupertinoIcons.camera,
+                          label: "Open camera",
+                          onTap: () => controller.openCamera(context),
                         ),
                       if (ss.settings.moveChatCreatorToHeader.value) const SizedBox(width: 10.0),
                       const Material(
@@ -134,6 +163,7 @@ class CupertinoHeader extends StatelessWidget {
               ],
             );
           }),
+          ),
         ),
       ),
     );
@@ -162,20 +192,22 @@ class CupertinoMiniHeader extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Obx(() {
               ns.listener.value;
-              return Container(
-                width: ns.width(context),
-                height: (topMargin - 20).clamp(kIsDesktop ? 65 : 40, double.infinity),
-                color: context.theme.colorScheme.properSurface.withOpacity(0.5),
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: kIsDesktop ? 10 : 5),
-                  child: Text(
-                    controller.showArchivedChats
-                        ? "Archive"
-                        : controller.showUnknownSenders
-                        ? "Unknown Senders"
-                        : "Messages",
-                    style: context.textTheme.titleMedium!.copyWith(color: context.theme.colorScheme.properOnSurface),
+              return GlassFill(
+                radius: 0,
+                child: Container(
+                  width: ns.width(context),
+                  height: (topMargin - 20).clamp(kIsDesktop ? 65 : 40, double.infinity),
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: kIsDesktop ? 10 : 5),
+                    child: Text(
+                      controller.showArchivedChats
+                          ? "Archive"
+                          : controller.showUnknownSenders
+                          ? "Unknown Senders"
+                          : "CowMessages",
+                      style: CowType.title(context),
+                    ),
                   ),
                 ),
               );

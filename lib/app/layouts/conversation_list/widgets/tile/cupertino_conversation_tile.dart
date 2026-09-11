@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/dialogs/conversation_peek_view.dart';
@@ -7,9 +6,10 @@ import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/conversat
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
-import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:bluebubbles/services/services.dart';
-import 'package:bluebubbles/utils/logger/logger.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
+import 'package:bluebubbles/utils/cow/signature.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,11 +36,35 @@ class _CupertinoConversationTileState extends CustomState<CupertinoConversationT
     forceDelete = false;
   }
 
+  /// chat colour; groups key on guid, 1:1 on handle
+  Signature _signature(BuildContext context) => Signature.forHandle(
+        controller.chat.participants.length == 1
+            ? controller.chat.participants.first.address
+            : controller.chat.guid,
+        context.theme.brightness,
+      );
+
   @override
   Widget build(BuildContext context) {
+    final sig = _signature(context);
+    return Obx(() {
+      ns.listener.value;
+      // unread fills, read stays flat; interaction wins
+      final unread = GlobalChatService.unreadState(controller.chat.guid).value;
+      final interactive = controller.shouldHighlight.value ||
+          controller.shouldPartialHighlight.value ||
+          controller.hoverHighlight.value;
+      final filled = unread && !interactive && !widget.deletedMode;
+      // theme text colours assume a flat surface
+      final Color? onFill = filled ? sig.onBase : null;
+      return _buildTile(context, sig, filled, interactive, onFill);
+    });
+  }
+
+  Widget _buildTile(BuildContext context, Signature sig, bool filled, bool interactive, Color? onFill) {
     final leading = ChatLeading(
       controller: controller,
-      unreadIcon: UnreadIcon(parentController: controller),
+      unreadIcon: UnreadIcon(parentController: controller, onFill: onFill),
     );
     final child = Material(
       color: Colors.transparent,
@@ -70,13 +94,14 @@ class _CupertinoConversationTileState extends CustomState<CupertinoConversationT
                   child: ChatTitle(
                     parentController: controller,
                     style: context.theme.textTheme.bodyLarge!.copyWith(
-                        fontWeight: controller.shouldHighlight.value ? FontWeight.w600 : FontWeight.w500,
-                        color: controller.shouldHighlight.value ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage) : null),
+                        fontSize: context.theme.textTheme.bodyLarge!.fontSize! * 1.12,
+                        fontWeight: filled || controller.shouldHighlight.value ? FontWeight.w600 : FontWeight.w500,
+                        color: onFill ?? (controller.shouldHighlight.value ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage) : null)),
                   ),
                 ),
                 const SizedBox(width: 10,),
                 if (!widget.deletedMode)
-                CupertinoTrailing(parentController: controller),
+                CupertinoTrailing(parentController: controller, onFill: onFill),
                 if (widget.deletedMode)
                 Builder(builder: (context) {
                   DateTime oldestDeletion = DateTime.now();
@@ -123,9 +148,10 @@ class _CupertinoConversationTileState extends CustomState<CupertinoConversationT
                   ChatSubtitle(
                     parentController: controller,
                     style: context.theme.textTheme.bodyMedium!.copyWith(
-                      color: controller.shouldHighlight.value
-                          ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage).withOpacity(0.85)
-                          : context.theme.colorScheme.outline,
+                      color: onFill?.withOpacity(0.82) ??
+                          (controller.shouldHighlight.value
+                              ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage).withOpacity(0.85)
+                              : context.theme.colorScheme.outline),
                       height: 1.5,
                     ),
                   ),
@@ -134,47 +160,67 @@ class _CupertinoConversationTileState extends CustomState<CupertinoConversationT
       ),
     );
 
-    return Obx(() {
-      ns.listener.value;
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
-        decoration: BoxDecoration(
-          color: controller.shouldPartialHighlight.value
-              ? context.theme.colorScheme.properSurface.lightenOrDarken(10)
-              : controller.shouldHighlight.value
-                  ? context.theme.colorScheme.bubble(context, controller.chat.isIMessage)
-                  : controller.hoverHighlight.value
-                      ? context.theme.colorScheme.properSurface.withOpacity(0.5)
-                      : null,
-          borderRadius: BorderRadius.circular(
-              controller.shouldHighlight.value || controller.shouldPartialHighlight.value || controller.hoverHighlight.value ? 8 : 0),
-        ),
-        child: ns.isAvatarOnly(context)
-            ? InkWell(
-                mouseCursor: MouseCursor.defer,
-                onTap: () => controller.onTap(context, widget.deletedMode),
-                onSecondaryTapUp: (details) => controller.onSecondaryTap(Get.context!, details),
-                onLongPress: kIsDesktop || kIsWeb
-                    ? null
-                    : () async {
-                        await peekChat(context, controller.chat, longPressPosition ?? Offset.zero);
-                      },
-                onTapDown: (details) {
-                  longPressPosition = details.globalPosition;
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: (ns.width(context) - 100) / 2).add(const EdgeInsets.only(right: 15)),
-                  child: leading,
-                ),
+    final tileChild = ns.isAvatarOnly(context)
+        ? InkWell(
+            mouseCursor: MouseCursor.defer,
+            onTap: () => controller.onTap(context, widget.deletedMode),
+            onSecondaryTapUp: (details) => controller.onSecondaryTap(Get.context!, details),
+            onLongPress: kIsDesktop || kIsWeb
+                ? null
+                : () async {
+                    await peekChat(context, controller.chat, longPressPosition ?? Offset.zero);
+                  },
+            onTapDown: (details) {
+              longPressPosition = details.globalPosition;
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: (ns.width(context) - 100) / 2).add(const EdgeInsets.only(right: 15)),
+              child: leading,
+            ),
+          )
+        : child;
+
+    return AnimatedContainer(
+      duration: Motion.quick,
+      curve: Motion.enter,
+      margin: filled
+          ? const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 2)
+          : EdgeInsets.zero,
+      decoration: BoxDecoration(
+        color: controller.shouldPartialHighlight.value
+            ? context.theme.colorScheme.properSurface.lightenOrDarken(10)
+            : controller.shouldHighlight.value
+                ? context.theme.colorScheme.bubble(context, controller.chat.isIMessage)
+                : controller.hoverHighlight.value
+                    ? context.theme.colorScheme.properSurface.withOpacity(0.5)
+                    : null,
+        gradient: filled
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: sig.gradient,
               )
-            : child,
-      );
-    });
+            : null,
+        borderRadius: BorderRadius.circular(
+            interactive ? 8 : (filled ? GlassTokens.card : 0)),
+      ),
+      // tinted glass, no backdrop filter - one per row
+      child: filled
+          ? GlassFill(
+              radius: GlassTokens.card,
+              fillAlpha: 0,
+              child: tileChild,
+            )
+          : tileChild,
+    );
   }
 }
 
 class CupertinoTrailing extends CustomStateful<ConversationTileController> {
-  const CupertinoTrailing({Key? key, required super.parentController});
+  const CupertinoTrailing({Key? key, required super.parentController, this.onFill});
+
+  /// set when the tile behind is filled
+  final Color? onFill;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTrailingState();
@@ -246,6 +292,12 @@ class _CupertinoTrailingState extends CustomState<CupertinoTrailing, void, Conve
 
   @override
   Widget build(BuildContext context) {
+    // follow the fill
+    final Color quiet = widget.onFill?.withOpacity(0.78) ??
+        (controller.shouldHighlight.value
+            ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage)
+            : context.theme.colorScheme.outline);
+
     return Padding(
       padding: const EdgeInsets.only(right: 15),
       child: Row(
@@ -272,10 +324,8 @@ class _CupertinoTrailingState extends CustomState<CupertinoTrailing, void, Conve
                   .copyWith(
                     color: (cachedLatestMessage?.error ?? 0) > 0
                         ? context.theme.colorScheme.error
-                        : controller.shouldHighlight.value
-                            ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage)
-                            : context.theme.colorScheme.outline,
-                    fontWeight: controller.shouldHighlight.value ? FontWeight.w500 : null,
+                        : quiet,
+                    fontWeight: widget.onFill != null || controller.shouldHighlight.value ? FontWeight.w500 : null,
                   )
                   .apply(fontSizeFactor: 1.1),
               overflow: TextOverflow.clip,
@@ -286,9 +336,7 @@ class _CupertinoTrailingState extends CustomState<CupertinoTrailing, void, Conve
             children: [
               Icon(
                 CupertinoIcons.forward,
-                color: controller.shouldHighlight.value
-                    ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage)
-                    : context.theme.colorScheme.outline,
+                color: quiet,
                 size: 15,
               ),
               if (controller.chat.muteType == "mute")
@@ -296,9 +344,7 @@ class _CupertinoTrailingState extends CustomState<CupertinoTrailing, void, Conve
                     padding: const EdgeInsets.only(top: 5.0),
                     child: Icon(
                       CupertinoIcons.bell_slash_fill,
-                      color: controller.shouldHighlight.value
-                          ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage)
-                          : context.theme.colorScheme.outline,
+                      color: quiet,
                       size: 12,
                     ))
             ],
@@ -310,7 +356,10 @@ class _CupertinoTrailingState extends CustomState<CupertinoTrailing, void, Conve
 }
 
 class UnreadIcon extends CustomStateful<ConversationTileController> {
-  const UnreadIcon({Key? key, required super.parentController});
+  const UnreadIcon({Key? key, required super.parentController, this.onFill});
+
+  /// quiet dot on a filled tile
+  final Color? onFill;
 
   @override
   State<StatefulWidget> createState() => _UnreadIconState();
@@ -335,7 +384,7 @@ class _UnreadIconState extends CustomState<UnreadIcon, void, ConversationTileCon
           ? Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(35),
-                color: context.theme.colorScheme.primary,
+                color: widget.onFill ?? context.theme.colorScheme.primary,
               ),
               width: 10,
               height: 10,

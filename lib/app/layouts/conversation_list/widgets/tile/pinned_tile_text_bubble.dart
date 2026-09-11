@@ -7,7 +7,7 @@ import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
-import 'package:faker/faker.dart' hide Color;
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,7 +31,7 @@ class PinnedTileTextBubbleState extends CustomState<PinnedTileTextBubble, void, 
   final bool leftSide = Random().nextBool();
   Message? lastMessage;
   String subtitle = "Unknown";
-  String fakeText = faker.lorem.words(1).join(" ");
+  String fakeText = CowRedact.text("moo", 1);
   late final StreamSubscription sub;
   String? cachedLatestMessageGuid = "";
   DateTime? cachedDateCreated;
@@ -51,7 +51,7 @@ class PinnedTileTextBubbleState extends CustomState<PinnedTileTextBubble, void, 
     subtitle = MessageHelper.getNotificationText(controller.chat.latestMessage);
     lastMessage = controller.chat.latestMessage;
     cachedLatestMessageGuid = controller.chat.latestMessage.guid!;
-    fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+    fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
     // run query after render has completed
     if (!kIsWeb) {
       updateObx(() {
@@ -72,7 +72,7 @@ class PinnedTileTextBubbleState extends CustomState<PinnedTileTextBubble, void, 
             if (newSubtitle != subtitle) {
               setState(() {
                 subtitle = newSubtitle;
-                fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+                fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
               });
             }
           }
@@ -89,7 +89,7 @@ class PinnedTileTextBubbleState extends CustomState<PinnedTileTextBubble, void, 
             if (newSubtitle != subtitle) {
               setState(() {
                 subtitle = newSubtitle;
-                fakeText = faker.lorem.words(subtitle.split(" ").length).join(" ");
+                fakeText = CowRedact.text(subtitle, subtitle.split(" ").length);
               });
             }
           }

@@ -68,11 +68,14 @@ class _ContactAvatarGroupWidgetState extends OptimizedState<ContactAvatarGroupWi
 
         if (widget.chat?.customAvatarPath != null && !hide) {
           dynamic file = File(widget.chat!.customAvatarPath!);
-          return CircleAvatar(
+          // circle
+          return ClipOval(
             key: ValueKey(widget.chat!.customAvatarPath!),
-            radius: avatarSize / 2,
-            backgroundImage: FileImage(file),
-            backgroundColor: Colors.transparent,
+            child: SizedBox(
+              width: avatarSize,
+              height: avatarSize,
+              child: Image.file(file, fit: BoxFit.cover),
+            ),
           );
         }
 
@@ -120,7 +123,8 @@ class _ContactAvatarGroupWidgetState extends OptimizedState<ContactAvatarGroupWi
                                     width: size,
                                     height: size,
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
+                                      borderRadius: BorderRadius.circular(
+                                          size / 2),
                                       color: context.theme.colorScheme.properSurface.withOpacity(0.8),
                                       border: Border.all(color: context.theme.colorScheme.background, width: avatarSize * 0.01)
                                     ),

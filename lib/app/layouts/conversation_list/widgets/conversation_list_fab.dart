@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 
 class ConversationListFAB extends CustomStateful<ConversationListController> {
   const ConversationListFAB({Key? key, required super.parentController});
@@ -67,20 +69,18 @@ class _ConversationListFABState extends CustomState<ConversationListFAB, void, C
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (ss.settings.cameraFAB.value && iOS && !kIsWeb && !kIsDesktop)
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 45,
-              maxHeight: 45,
-            ),
-            child: FloatingActionButton(
+          PressScale(
+            onTap: () => controller.openCamera(context),
+            scale: 0.92,
+            semanticLabel: "Open camera",
+            child: GlassFill(
+              radius: GlassTokens.capsule,
+              padding: const EdgeInsets.all(12),
               child: Icon(
-                iOS ? CupertinoIcons.camera : Icons.photo_camera,
+                CupertinoIcons.camera,
                 size: 20,
-                color: context.theme.colorScheme.onPrimaryContainer
+                color: context.theme.colorScheme.onSurface,
               ),
-              onPressed: () => controller.openCamera(context),
-              heroTag: null,
-              backgroundColor: context.theme.colorScheme.primaryContainer,
             ),
           ),
         if (ss.settings.cameraFAB.value && iOS && !kIsWeb && !kIsDesktop)
@@ -94,20 +94,38 @@ class _ConversationListFABState extends CustomState<ConversationListFAB, void, C
             Text("Start a Chat >", style: context.textTheme.labelLarge?.copyWith(color: Colors.white)),
             if (chats.chats.isEmpty)
             const SizedBox(width: 16),
-            InkWell(
-              onLongPress: iOS || !ss.settings.cameraFAB.value || kIsWeb || kIsDesktop
-                ? null : () => controller.openCamera(context),
-              child: CallbackShortcuts(
-                bindings: _newMessageShortcuts,
-                child: FloatingActionButton(
-                  focusNode: controller.newMessageFocusNode,
-                  backgroundColor: context.theme.colorScheme.primary,
-                  child: Icon(
-                    iOS ? CupertinoIcons.pencil : Icons.message,
-                    color: context.theme.colorScheme.onPrimary,
-                    size: 25
+            CallbackShortcuts(
+              bindings: _newMessageShortcuts,
+              child: Focus(
+                focusNode: controller.newMessageFocusNode,
+                child: PressScale(
+                  onTap: () => controller.openNewChatCreator(context),
+                  onLongPress: iOS || !ss.settings.cameraFAB.value || kIsWeb || kIsDesktop
+                      ? null : () => controller.openCamera(context),
+                  scale: 0.92,
+                  semanticLabel: "New message",
+                  // A capsule with a label rather than a round button: on a
+                  // glass surface the word is what makes the control legible,
+                  // the icon alone reads as decoration.
+                  child: GlassFill(
+                    radius: GlassTokens.capsule,
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          iOS ? CupertinoIcons.pencil : Icons.message,
+                          color: context.theme.colorScheme.onSurface,
+                          size: 20,
+                        ),
+                        const SizedBox(width: Space.sm),
+                        Text(
+                          "New",
+                          style: CowType.name(context).copyWith(fontSize: 15),
+                        ),
+                      ],
+                    ),
                   ),
-                  onPressed: () => controller.openNewChatCreator(context)
                 ),
               ),
             ),

@@ -92,7 +92,8 @@ class _SamsungConversationListState extends OptimizedState<SamsungConversationLi
               child: Obx(() {
                 final _chats = showDeleted ? deletedChats : chats.chats
                     .archivedHelper(controller.showArchivedChats)
-                    .unknownSendersHelper(controller.showUnknownSenders);
+                    .unknownSendersHelper(controller.showUnknownSenders)
+                    .withoutEmptyHelper();
 
                 return CustomScrollView(
                   physics: ThemeSwitcher.getScrollPhysics(),

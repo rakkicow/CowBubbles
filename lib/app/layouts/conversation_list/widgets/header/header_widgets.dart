@@ -41,7 +41,7 @@ class HeaderText extends StatelessWidget {
             ? "Unknown Senders"
             : controller.showDeletedMessages
             ? "Recently Deleted"
-            : "Messages",
+            : "CowMessages",
         style: context.textTheme.headlineLarge!.copyWith(
           color: context.theme.colorScheme.onBackground,
           fontWeight: FontWeight.w600,

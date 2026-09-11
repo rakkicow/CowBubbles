@@ -192,7 +192,7 @@ class _ExpandedHeaderTextState extends CustomState<ExpandedHeaderText, void, Con
               ? "Recently Deleted"
               : unreadChats > 0
               ? "$unreadChats unread message${unreadChats > 1 ? "s" : ""}"
-              : "Messages",
+              : "CowMessages",
           style: context.theme.textTheme.displaySmall!.copyWith(color: context.theme.colorScheme.onBackground),
         textAlign: TextAlign.center,
       );

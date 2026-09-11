@@ -13,7 +13,8 @@ class ContactAvatarWidget extends StatefulWidget {
       {super.key,
       this.size,
       this.fontSize,
-      this.borderThickness = 2.0,
+      // no border; overlapping callers pass their own
+      this.borderThickness = 0.0,
       this.editable = true,
       this.handle,
       this.contact,
@@ -110,7 +111,6 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Color tileColor =
         ts.inDarkMode(context) ? context.theme.colorScheme.properSurface : context.theme.colorScheme.background;
 
     final size = ((widget.size ?? 40) * (widget.scaleSize ? ss.settings.avatarScale.value : 1)).roundToDouble();
@@ -148,6 +148,7 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
               height: size,
               padding: widget.padding,
               decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 gradient: LinearGradient(
                   begin: AlignmentDirectional.topStart,
                   end: AlignmentDirectional.bottomEnd,
@@ -157,11 +158,6 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
                   ],
                   stops: [0.3, 0.9],
                 ),
-                border: Border.all(
-                    color: ss.settings.skin.value == Skins.Samsung ? tileColor : context.theme.colorScheme.background,
-                    width: widget.borderThickness,
-                    strokeAlign: BorderSide.strokeAlignOutside),
-                shape: BoxShape.circle,
               ),
               clipBehavior: Clip.antiAlias,
               alignment: Alignment.center,
@@ -171,13 +167,20 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
                 final avatar = contact?.avatar;
                 if (!hide && widget.handle == null && contact == null && ss.settings.userAvatarPath.value != null) {
                   dynamic file = File(ss.settings.userAvatarPath.value!);
-                  return CircleAvatar(
+                  return SizedBox.expand(
                     key: ValueKey(ss.settings.userAvatarPath.value!),
-                    radius: size / 2,
-                    backgroundImage: FileImage(file),
-                    backgroundColor: Colors.transparent,
+                    child: Image.file(file, fit: BoxFit.cover),
                   );
                 } else if (isNullOrEmpty(avatar) || hide) {
+                  // redacted stand-in
+                  if (hide) {
+                    return Text(
+                      '\u{1F42E}',
+                      key: Key("$keyPrefix-avatar-cow"),
+                      style: TextStyle(fontSize: size * 0.5, height: 1),
+                      textAlign: TextAlign.center,
+                    );
+                  }
                   String? initials = widget.handle?.initials?.substring(0, iOS ? null : 1);
                   if (!isNullOrEmpty(initials) && !hide) {
                     return Text(
@@ -203,9 +206,10 @@ class _ContactAvatarWidgetState extends OptimizedState<ContactAvatarWidget> {
                   return SizedBox.expand(
                     child: Image.memory(
                       avatar!,
-                      cacheHeight: size.toInt() * 2,
-                      cacheWidth: size.toInt() * 2,
-                      filterQuality: FilterQuality.none,
+                      // decode at device pixels, or photos go soft
+                      cacheHeight: (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
+                      cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
+                      filterQuality: FilterQuality.medium,
                       fit: BoxFit.cover,
                       gaplessPlayback: true,
                     ),

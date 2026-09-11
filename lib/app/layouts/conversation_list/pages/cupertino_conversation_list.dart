@@ -118,6 +118,7 @@ class CupertinoConversationListState
                               : chats.chats
                                   .archivedHelper(showArchived)
                                   .unknownSendersHelper(showUnknown)
+                                  .withoutEmptyHelper()
                                   .bigPinHelper(true);
 
                           if (_chats.isEmpty) {
@@ -199,7 +200,11 @@ class CupertinoConversationListState
                                 }
                                 return Column(
                                   children: <Widget>[
-                                    SizedBox(
+                                    // Isolated so the animated background
+                                    // underneath does not force the pinned
+                                    // grid to repaint every frame.
+                                    RepaintBoundary(
+                                      child: SizedBox(
                                       height: height,
                                       child: PageView.builder(
                                         clipBehavior: Clip.none,
@@ -240,6 +245,7 @@ class CupertinoConversationListState
                                           );
                                         },
                                         itemCount: _pageCount,
+                                      ),
                                       ),
                                     ),
                                     if (_pageCount > 1)
@@ -286,6 +292,7 @@ class CupertinoConversationListState
                               : chats.chats
                                   .archivedHelper(showArchived)
                                   .unknownSendersHelper(showUnknown)
+                                  .withoutEmptyHelper()
                                   .bigPinHelper(false);
 
                           if (!chats.loadedChatBatch.value || _chats.isEmpty) {

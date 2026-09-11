@@ -16,6 +16,8 @@ import 'package:bluebubbles/services/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:bluebubbles/utils/cow/signature.dart';
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 
 class PinnedConversationTile extends CustomStateful<ConversationTileController> {
   PinnedConversationTile({
@@ -182,23 +184,35 @@ class _UnreadIconState extends CustomState<UnreadIcon, void, ConversationTileCon
     forceDelete = false;
   }
 
+  /// ring, concentric with the avatar circle
+  static const double _inset = 3.5;
+  static const double _stroke = 2.5;
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final unread = GlobalChatService.unreadState(controller.chat.guid).value;
-      return unread ? Positioned(
-        left: sqrt(widget.width) - widget.width * 0.05 * sqrt(2),
-        top: sqrt(widget.width) - widget.width * 0.05 * sqrt(2),
-        child: Container(
-          width: widget.width * 0.2,
-          height: widget.width * 0.2,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: context.theme.colorScheme.primary,
+      if (!unread) return const SizedBox.shrink();
+      final sig = Signature.forHandle(
+        controller.chat.participants.length == 1
+            ? controller.chat.participants.first.address
+            : controller.chat.guid,
+        context.theme.brightness,
+      );
+      return Positioned(
+        left: -_inset,
+        top: -_inset,
+        child: IgnorePointer(
+          child: Container(
+            width: widget.width + _inset * 2,
+            height: widget.width + _inset * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: sig.base, width: _stroke),
+            ),
           ),
-          margin: const EdgeInsets.only(right: 3),
         ),
-      ) : const SizedBox.shrink();
+      );
     });
   }
 }
@@ -339,11 +353,11 @@ class _ChatTitleState extends CustomState<ChatTitle, void, ConversationTileContr
           color: controller.shouldHighlight.value
               ? context.theme.colorScheme.onBubble(context, controller.chat.isIMessage)
               : context.theme.colorScheme.outline,
-          fontSizeFactor: controller.chat.isPinned! ? 0.95 : 1,
+          fontSizeFactor: controller.chat.isPinned! ? 1.1 : 1.15,
         );
         String _title = title;
         if (hideInfo) {
-          _title = controller.chat.participants.length > 1 ? "Group Chat" : controller.chat.participants[0].fakeName;
+          _title = controller.chat.participants.length > 1 ? CowRedact.herd(controller.chat.guid) : controller.chat.participants[0].fakeName;
         }
 
         return SizedBox(
