@@ -222,9 +222,11 @@ class _ConversationDetailsState extends OptimizedState<ConversationDetails> with
                       width: 40 * ss.settings.avatarScale.value,
                       height: 40 * ss.settings.avatarScale.value,
                       decoration: BoxDecoration(
-                        color: !iOS ? null : context.theme.colorScheme.properSurface,
-                        shape: BoxShape.circle,
-                        border: iOS ? null : Border.all(color: context.theme.colorScheme.primary, width: 3)
+                        color: !iOS ? null : context.theme.colorScheme.onSurface.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(12 * ss.settings.avatarScale.value),
+                                                border: iOS
+                            ? Border.all(color: context.theme.colorScheme.onSurface.withOpacity(0.18), width: 1)
+                            : Border.all(color: context.theme.colorScheme.primary, width: 3)
                       ),
                       child: Icon(
                         Icons.add,
@@ -261,9 +263,11 @@ class _ConversationDetailsState extends OptimizedState<ConversationDetails> with
                           width: 40 * ss.settings.avatarScale.value,
                           height: 40 * ss.settings.avatarScale.value,
                           decoration: BoxDecoration(
-                              color: !iOS ? null : context.theme.colorScheme.properSurface,
-                              shape: BoxShape.circle,
-                              border: iOS ? null : Border.all(color: context.theme.colorScheme.primary, width: 3)
+                              color: !iOS ? null : context.theme.colorScheme.onSurface.withOpacity(0.10),
+                              borderRadius: BorderRadius.circular(12 * ss.settings.avatarScale.value),
+                                                            border: iOS
+                            ? Border.all(color: context.theme.colorScheme.onSurface.withOpacity(0.18), width: 1)
+                            : Border.all(color: context.theme.colorScheme.primary, width: 3)
                           ),
                           child: Icon(
                             Icons.more_horiz,
@@ -301,9 +305,9 @@ class _ConversationDetailsState extends OptimizedState<ConversationDetails> with
                         width: 40 * ss.settings.avatarScale.value,
                         height: 40 * ss.settings.avatarScale.value,
                         decoration: BoxDecoration(
-                          color: !iOS ? null : context.theme.colorScheme.properSurface,
-                          shape: BoxShape.circle,
-                          border: iOS ? null : Border.all(color: context.theme.colorScheme.error, width: 3)
+                          color: !iOS ? null : context.theme.colorScheme.onSurface.withOpacity(0.10),
+                          borderRadius: BorderRadius.circular(12 * ss.settings.avatarScale.value),
+                                                    border: iOS ? null : Border.all(color: context.theme.colorScheme.error, width: 3)
                         ),
                         child: Icon(
                           Icons.error_outline,

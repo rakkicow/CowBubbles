@@ -120,19 +120,23 @@ class _AppleId2FAState extends OptimizedState<AppleId2FA> {
                                     var text = index < currentCode.length ? currentCode[index] : "";
                                     return Expanded(child: 
                                       Container(
+                                        // Code cells as small glass tiles; the
+                                        // active one takes the accent rim.
                                         decoration: index == currentCode.length ? 
                                           BoxDecoration(
+                                            color: context.theme.colorScheme.onSurface.withOpacity(0.10),
                                             border: Border.all(
                                               color: context.theme.colorScheme.primary,
                                               width: 2
                                             ),
-                                            borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                            borderRadius: const BorderRadius.all(Radius.circular(14)),
                                           )
                                         : BoxDecoration(
+                                          color: context.theme.colorScheme.onSurface.withOpacity(0.08),
                                           border: Border.all(
-                                            color: context.theme.colorScheme.outline,
+                                            color: context.theme.colorScheme.onSurface.withOpacity(0.18),
                                           ),
-                                          borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                          borderRadius: const BorderRadius.all(Radius.circular(14)),
                                         ),
                                         margin: const EdgeInsets.all(3),
                                         height: 50,

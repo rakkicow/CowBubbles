@@ -360,7 +360,7 @@ class _SharedStreamsPanelState extends OptimizedState<SharedStreamsPanel> {
                             backgroundColor: context.theme.colorScheme.properSurface,
                             title: Text("Got an email?", style: context.theme.textTheme.titleLarge),
                             content: Text(
-                              'Register OpenBubbles for iCloud links in App settings, then simply tap the subscribe button in your email.\n\nSettings -> Open by default -> Add link -> select www.iCloud.com -> Add',
+                              'Register CowBubbles for iCloud links in App settings, then simply tap the subscribe button in your email.\n\nSettings -> Open by default -> Add link -> select www.iCloud.com -> Add',
                               style: context.theme.textTheme.bodyLarge,
                             ),
                             actions: <Widget>[

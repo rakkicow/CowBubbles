@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_animations/simple_animations.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -60,7 +61,7 @@ class _WelcomePageState extends OptimizedState<WelcomePage> with TickerProviderS
   @override
   Widget build(BuildContext context) {
     return SetupPageTemplate(
-      title: "Welcome to OpenBubbles",
+      title: "Welcome to CowBubbles",
       subtitle: "Send and receive iMessages from your Android. Become a blue bubble!",
       aboveTitle: Theme(
         data: context.theme.copyWith(
@@ -92,11 +93,9 @@ class _WelcomePageState extends OptimizedState<WelcomePage> with TickerProviderS
             ),
             child: Builder(
               builder: (context) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: context.theme.colorScheme.surface.lightenOrDarken(65),
-                  ),
+                // The welcome card is the first glass surface the user sees.
+                return GlassFill(
+                  radius: GlassTokens.panel,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Stack(

@@ -162,8 +162,8 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                   backgroundColor: tileColor,
                   children: [
                     SettingsTile(
-                      title: "OpenBubbles Website",
-                      subtitle: "Visit the OpenBubbles Homepage",
+                      title: "CowBubbles Website",
+                      subtitle: "Visit the CowBubbles Homepage",
                       onTap: () async {
                         await launchUrl(Uri(scheme: "https", host: "openbubbles.app"), mode: LaunchMode.externalApplication);
                       },
@@ -177,7 +177,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                     const SettingsDivider(),
                     SettingsTile(
                       title: "Make a Donation",
-                      subtitle: "Support the developers by making a one-time or recurring donation to the OpenBubbles Team!",
+                      subtitle: "Support the developers by making a one-time or recurring donation to the CowBubbles Team!",
                       onTap: () async {
                         await launchUrl(Uri.parse("https://www.paypal.com/donate/?hosted_button_id=MUZH6LH6ZGN6G"), mode: LaunchMode.externalApplication);
                       },
@@ -191,7 +191,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                     const SettingsDivider(),
                     SettingsTile(
                       title: "Documentation",
-                      subtitle: "Learn how to use OpenBubbles or fix common issues",
+                      subtitle: "Learn how to use CowBubbles or fix common issues",
                       onTap: () async {
                         await launchUrl(Uri(scheme: "https", host: "openbubbles.app", path: "docs/faq.html"), mode: LaunchMode.externalApplication);
                       },
@@ -205,7 +205,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                     const SettingsDivider(),
                     SettingsTile(
                       title: "Source Code",
-                      subtitle: "View the source code for OpenBubbles, and contribute!",
+                      subtitle: "View the source code for CowBubbles, and contribute!",
                       onTap: () async {
                         await launchUrl(Uri(scheme: "https", host: "github.com", path: "OpenBubbles/openbubbles-app"), mode: LaunchMode.externalApplication);
                       },
@@ -368,7 +368,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                           ),
                         );
                       },
-                      subtitle: "Meet the developers behind OpenBubbles",
+                      subtitle: "Meet the developers behind CowBubbles",
                       leading: const SettingsLeadingIcon(
                         iosIcon: CupertinoIcons.person_alt,
                         materialIcon: Icons.person,
@@ -575,7 +575,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                                                 child: ListBody(
                                                   children: <Widget>[
                                                     Text(
-                                                      "OpenBubbles",
+                                                      "CowBubbles",
                                                       style: context.theme.textTheme.titleLarge,
                                                     ),
                                                     Text(

@@ -200,7 +200,7 @@ class PhoneNumberState extends OptimizedState<PhoneNumber> {
                             },
                             initialVal: tempRegister.value,
                             title: "Register this number",
-                            subtitle: "Use this phone number with OpenBubbles and your other Apple devices",
+                            subtitle: "Use this phone number with CowBubbles and your other Apple devices",
                             backgroundColor: tileColor,
                             isThreeLine: true,
                           ),
@@ -216,7 +216,7 @@ class PhoneNumberState extends OptimizedState<PhoneNumber> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "If SMS-based activation is not working, you can try SMS-less activation. This requires granting OpenBubbles special permissions so it can authenticate directly with your SIM.",
+                                          "If SMS-based activation is not working, you can try SMS-less activation. This requires granting CowBubbles special permissions so it can authenticate directly with your SIM.",
                                           style: Get.textTheme.bodyMedium,
                                         ),
                                         Padding(padding: const EdgeInsets.only(top:10), child: Text(
@@ -313,7 +313,7 @@ class PhoneNumberState extends OptimizedState<PhoneNumber> {
                             },
                             initialVal: controller.currentPhoneUsers.containsKey(sim["subscription"]),
                             title: sim["carrier"],
-                            subtitle: "Use this phone number with OpenBubbles and your other Apple devices",
+                            subtitle: "Use this phone number with CowBubbles and your other Apple devices",
                             backgroundColor: tileColor,
                             isThreeLine: true,
                           )),

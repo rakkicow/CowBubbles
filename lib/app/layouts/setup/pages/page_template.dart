@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:bluebubbles/helpers/ui/theme_helpers.dart';
 import 'package:bluebubbles/app/layouts/setup/setup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:simple_animations/simple_animations.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 
 class SetupPageTemplate extends StatelessWidget {
   SetupPageTemplate({
@@ -118,9 +118,7 @@ class PageContent extends StatelessWidget {
           width: context.width * 3 / 4,
           child: Text(
               title,
-              style: context.theme.textTheme.displayMedium!.apply(
-                fontWeightDelta: 2,
-              ).copyWith(height: 1.35, color: context.theme.colorScheme.onBackground)
+              style: CowType.display(context).copyWith(height: 1.15),
           ),
         ),
       ),
@@ -131,10 +129,7 @@ class PageContent extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
             subtitle,
-            style: context.theme.textTheme.bodyLarge!.apply(
-              fontSizeDelta: 1.5,
-              color: context.theme.colorScheme.outline,
-            ).copyWith(height: 2)
+            style: CowType.secondary(context).copyWith(fontSize: 15.5, height: 1.5),
         ),
       ),
     );
@@ -184,94 +179,54 @@ class PageButtons extends StatelessWidget {
     return customButton ?? Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        title == "Welcome to OpenBubbles" ? const SizedBox.shrink() : Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              colors: [HexColor('2772C3'), HexColor('5CA7F8').darkenPercent(5)],
-            ),
+        title == "Welcome to CowBubbles" ? const SizedBox.shrink() : GlassButton(
+          semanticLabel: "Back",
+          onTap: () async {
+            previousPage();
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.arrow_back, color: context.theme.colorScheme.onBackground, size: 20),
+              const SizedBox(width: 10),
+              Text("Back", style: CowType.name(context)),
+            ],
           ),
-          height: 40,
-          padding: const EdgeInsets.all(2),
-          child: ElevatedButton(
-            style: ButtonStyle(
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              ),
-              backgroundColor: WidgetStateProperty.all(context.theme.colorScheme.background),
-              shadowColor: WidgetStateProperty.all(context.theme.colorScheme.background),
-              maximumSize: WidgetStateProperty.all(const Size(200, 36)),
-              minimumSize: WidgetStateProperty.all(const Size(30, 30)),
+        ),
+        // The forward button carries the accent: it is the one action on the
+        // page that moves you on, so it is the one surface that is not glass.
+        PressScale(
+          scale: 0.96,
+          semanticLabel: "Next",
+          onTap: () async {
+            final proceed = (await onNextPressed?.call()) ?? true;
+            if (proceed) nextPage();
+          },
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(GlassTokens.capsule),
+              color: context.theme.colorScheme.primary,
             ),
-            onPressed: () async {
-              previousPage();
-            },
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.arrow_back, color: context.theme.colorScheme.onBackground, size: 20),
-                const SizedBox(width: 10),
-                Text("Back", style: context.theme.textTheme.bodyLarge!.apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onBackground)),
-              ],
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              colors: [HexColor('2772C3'), HexColor('5CA7F8').darkenPercent(5)],
-            ),
-          ),
-          height: 40,
-          child: ElevatedButton(
-            style: ButtonStyle(
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                Text("Next", style: CowType.name(context).copyWith(color: context.theme.colorScheme.onPrimary)),
+                const SizedBox(width: 8),
+                CustomAnimationBuilder<double>(
+                  control: animation,
+                  tween: tween,
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOut,
+                  builder: (context, anim, _) {
+                    return Padding(
+                      padding: EdgeInsets.only(left: anim),
+                      child: Icon(Icons.arrow_forward, color: context.theme.colorScheme.onPrimary, size: 20),
+                    );
+                  },
                 ),
-              ),
-              backgroundColor: WidgetStateProperty.all(Colors.transparent),
-              shadowColor: WidgetStateProperty.all(Colors.transparent),
-              maximumSize: WidgetStateProperty.all(const Size(200, 36)),
-              minimumSize: WidgetStateProperty.all(const Size(30, 30)),
-            ),
-            onPressed: () async {
-              final proceed = (await onNextPressed?.call()) ?? true;
-              if (proceed) nextPage();
-            },
-            child: Shimmer.fromColors(
-              baseColor: Colors.white70,
-              highlightColor: Colors.white,
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 30.0),
-                    child: Text("Next", style: context.theme.textTheme.bodyLarge!.apply(fontSizeFactor: 1.1, color: Colors.white)),
-                  ),
-                  Positioned(
-                    left: 40,
-                    child: CustomAnimationBuilder<double>(
-                      control: animation,
-                      tween: tween,
-                      duration: const Duration(milliseconds: 600),
-                      curve: Curves.easeOut,
-                      builder: (context, anim, _) {
-                        return Padding(
-                          padding: EdgeInsets.only(left: anim),
-                          child: const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                        );
-                      },
-                    ),
-                  )
-                ],
-              ),
+              ],
             ),
           ),
         ),

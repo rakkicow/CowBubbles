@@ -1,5 +1,7 @@
 import 'package:bluebubbles/app/layouts/settings/widgets/content/settings_leading_icon.dart';
-import 'package:bluebubbles/helpers/ui/theme_helpers.dart';
+import 'package:bluebubbles/helpers/helpers.dart';
+import 'package:bluebubbles/services/services.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,6 +28,7 @@ class SettingsSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final iOS = ss.settings.skin.value == Skins.iOS;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -35,11 +38,11 @@ class SettingsSwitch extends StatelessWidget {
         child: ListTile(
           mouseCursor: MouseCursor.defer,
           enableFeedback: true,
-          minVerticalPadding: 10,
-          horizontalTitleGap: 10,
+          minVerticalPadding: iOS ? Space.md : 10,
+          horizontalTitleGap: iOS ? Space.md : 10,
           title: Text(
             title,
-            style: context.theme.textTheme.bodyLarge,
+            style: iOS ? CowType.body(context) : context.theme.textTheme.bodyLarge,
           ),
           leading: leading == null ? null : Padding(
             padding: EdgeInsets.only(bottom: isThreeLine ? 10 : 0.0, right: 5, left: 5),
@@ -52,9 +55,11 @@ class SettingsSwitch extends StatelessWidget {
           ),
           subtitle: subtitle != null ? Text(
             subtitle!,
-            style: context.theme.textTheme.bodySmall!.copyWith(color: context.theme.colorScheme.properOnSurface.withOpacity(0.75), height: 1.5),
+            style: iOS
+                ? CowType.secondary(context).copyWith(height: 1.4)
+                : context.theme.textTheme.bodySmall!.copyWith(color: context.theme.colorScheme.properOnSurface.withOpacity(0.75), height: 1.5),
           ) : null,
-          contentPadding: padding ? const EdgeInsets.symmetric(horizontal: 16.0) : EdgeInsets.zero,
+          contentPadding: padding ? const EdgeInsets.symmetric(horizontal: Space.lg) : EdgeInsets.zero,
         ),
       ),
     );

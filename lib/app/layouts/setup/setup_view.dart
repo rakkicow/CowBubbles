@@ -459,7 +459,7 @@ class SetupViewController extends StatefulController {
                     Align(
                       alignment: Alignment.center,
                       child: Text(
-                        "The above message is from Apple.\nWarning: Do not contact Apple support for help with OpenBubbles. Do not mention OpenBubbles. For assistance, join our Discord from our website. If you can't login on this Apple Device, call Apple support. When clicking the contact button below, choose 'Get Started,' not 'Chat,' and then choose 'Apple Device.' Do not mention you are using OpenBubbles.\n${RustPushBBUtils.modelToUser(devInfo.name)}\nS/N: ${devInfo.serial}\nmacOS ${devInfo.osVersion}",
+                        "The above message is from Apple.\nWarning: Do not contact Apple support for help with CowBubbles. Do not mention CowBubbles. For assistance, join our Discord from our website. If you can't login on this Apple Device, call Apple support. When clicking the contact button below, choose 'Get Started,' not 'Chat,' and then choose 'Apple Device.' Do not mention you are using CowBubbles.\n${RustPushBBUtils.modelToUser(devInfo.name)}\nS/N: ${devInfo.serial}\nmacOS ${devInfo.osVersion}",
                         textAlign: TextAlign.center,
                         style: Get.textTheme.bodySmall,
                       )
@@ -974,11 +974,11 @@ class SetupHeader extends StatelessWidget {
             children: [
               Hero(
                 tag: "setup-icon",
-                child: Image.asset("assets/icon/icon.png", width: 30, fit: BoxFit.contain)
+                child: ClipRRect(borderRadius: BorderRadius.circular(7), child: Image.asset("assets/icon/cow_icon.png", width: 30, fit: BoxFit.contain))
               ),
               const SizedBox(width: 10),
               Text(
-                "OpenBubbles",
+                "CowBubbles",
                 style: context.theme.textTheme.bodyLarge!.apply(fontWeightDelta: 2, fontSizeFactor: 1.35),
               ),
             ],

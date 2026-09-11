@@ -351,7 +351,7 @@ class _TroubleshootPanelState extends OptimizedState<TroubleshootPanel> {
                           "Logs have been exported to your downloads folder. Tap here to share it.",
                           durationMs: 5000,
                           onTap: (snackbar) async {
-                            Share.file("OpenBubbles Logs", newPath);
+                            Share.file("CowBubbles Logs", newPath);
                           },
                         );
                         // Logger.writeLogToFile(total);
@@ -576,7 +576,7 @@ class _TroubleshootPanelState extends OptimizedState<TroubleshootPanel> {
                                   backgroundColor: context.theme.colorScheme.properSurface,
                                   title: Text("Enable development mode?", style: context.theme.textTheme.titleLarge),
                                   content: Text(
-                                    'This mode is intended for developer use only. Extensions added through this mode have not been reviewed or approved by neither OpenBubbles or Google. You are responsible for ensuring the safety of your data and any extensions you add.',
+                                    'This mode is intended for developer use only. Extensions added through this mode have not been reviewed or approved by neither CowBubbles or Google. You are responsible for ensuring the safety of your data and any extensions you add.',
                                     style: context.theme.textTheme.bodyLarge,
                                   ),
                                   actions: <Widget>[
@@ -605,7 +605,7 @@ class _TroubleshootPanelState extends OptimizedState<TroubleshootPanel> {
                         }
                         ss.settings.developerEnabled.value = val;
                         ss.settings.save();
-                        showSnackbar("Success", "Restart device or force quit OpenBubbles to unload extensions");
+                        showSnackbar("Success", "Restart device or force quit CowBubbles to unload extensions");
                       },
                       initialVal: ss.settings.developerEnabled.value,
                       title: "Enable Developer Mode",
@@ -716,7 +716,7 @@ class _TroubleshootPanelState extends OptimizedState<TroubleshootPanel> {
                 onTap: () async {
                   ss.settings.developerMode.clear();
                   ss.saveSettings();
-                  showSnackbar("Success", "Restart device or force quit OpenBubbles to unload extensions");
+                  showSnackbar("Success", "Restart device or force quit CowBubbles to unload extensions");
                 },
               );
 

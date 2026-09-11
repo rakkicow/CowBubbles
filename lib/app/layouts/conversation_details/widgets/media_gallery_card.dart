@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:universal_io/io.dart';
 import 'package:video_player/video_player.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class MediaGalleryCard extends StatefulWidget {
   MediaGalleryCard({super.key, required this.attachment});
@@ -206,14 +207,15 @@ class _MediaGalleryCardState extends OptimizedState<MediaGalleryCard> with Autom
       child = const SizedBox.shrink();
     }
 
+    // A glass card, so the gallery reads as part of the same surface family as
+    // the option rows around it rather than as a flat tile among glass.
     return ClipRRect(
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(GlassTokens.card),
       clipBehavior: Clip.antiAlias,
-      child: Container(
-        alignment: Alignment.center,
-        color: context.theme.colorScheme.properSurface,
-        padding: addPadding ? const EdgeInsets.all(10) : null,
-        child: child,
+      child: GlassFill(
+        radius: GlassTokens.card,
+        padding: addPadding ? const EdgeInsets.all(10) : EdgeInsets.zero,
+        child: Align(alignment: Alignment.center, child: child),
       ),
     );
   }

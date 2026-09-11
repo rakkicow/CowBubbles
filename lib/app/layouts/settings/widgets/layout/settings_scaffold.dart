@@ -2,6 +2,7 @@ import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/wrappers/scrollbar_wrapper.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
 import 'package:bluebubbles/services/services.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +66,9 @@ class SettingsScaffold extends StatelessWidget {
             centerTitle: ss.settings.skin.value == Skins.iOS,
             title: Text(
               title,
-              style: context.theme.textTheme.titleLarge,
+              style: ss.settings.skin.value == Skins.iOS
+                  ? CowType.title(context)
+                  : context.theme.textTheme.titleLarge,
             ),
             actions: actions,
           ),
@@ -176,14 +179,21 @@ class SettingsScaffold extends StatelessWidget {
                         if (ss.settings.skin.value != Skins.Samsung && initialHeader != null)
                           SliverToBoxAdapter(
                             child: Container(
-                                height: 50,
+                                height: ss.settings.skin.value == Skins.iOS ? 56 : 50,
                                 alignment: Alignment.bottomLeft,
                                 color: ss.settings.skin.value == Skins.iOS ? headerColor : tileColor,
                                 child: Padding(
-                                  padding: EdgeInsets.only(bottom: 8.0, left: ss.settings.skin.value == Skins.iOS ? 30 : 15),
-                                  child: Text(initialHeader!.psCapitalize,
+                                  padding: EdgeInsets.only(
+                                      bottom: ss.settings.skin.value == Skins.iOS ? Space.sm : 8.0,
+                                      left: ss.settings.skin.value == Skins.iOS ? Space.xl : 15),
+                                  // Matches SettingsHeader so the first section
+                                  // does not look different from the rest.
+                                  child: Text(
+                                      ss.settings.skin.value == Skins.iOS
+                                          ? initialHeader!
+                                          : initialHeader!.psCapitalize,
                                       style: ss.settings.skin.value == Skins.iOS
-                                          ? iosSubtitle
+                                          ? CowType.title(context)
                                           : materialSubtitle),
                                 )),
                           ),

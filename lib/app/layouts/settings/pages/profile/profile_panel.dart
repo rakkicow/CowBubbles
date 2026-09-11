@@ -681,7 +681,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
 
                                 final status = await http.dio.get("https://hw.openbubbles.app/status");
                                 var hasCapacity = status.data["available"];
-                                var description = "When an OpenBubbles subscription becomes invalid, we reserve your device for a few days as a courtesy should you choose to restart your subscription. Unfortunately, however, we have already released your device to another user.";
+                                var description = "When an CowBubbles subscription becomes invalid, we reserve your device for a few days as a courtesy should you choose to restart your subscription. Unfortunately, however, we have already released your device to another user.";
                                 if (hasCapacity) {
                                   description += " We have more devices available, however, you will have to re-activate. Backing up your messages now is recommended in case you aren't able to get back in.";
                                 } else {

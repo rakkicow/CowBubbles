@@ -115,6 +115,13 @@ extension ChatListHelpers on RxList<Chat> {
     }
   }
 
+  /// Drops chats with nobody in them and nothing said - leftovers of a sync
+  /// that resolved no participants. They list as "Unnamed chat" over a blank
+  /// preview and there is nothing to do in them.
+  RxList<Chat> withoutEmptyHelper() {
+    return where((e) => e.participants.isNotEmpty || e.latestMessage.dateCreated!.millisecondsSinceEpoch != 0).toList().obs;
+  }
+
   RxList<Chat> unknownSendersHelper(bool unknown) {
     if (!ss.settings.filterUnknownSenders.value) return this;
     if (unknown) {

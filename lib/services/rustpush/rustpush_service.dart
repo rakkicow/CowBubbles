@@ -3827,7 +3827,7 @@ class RustPushService extends GetxService {
       Logger.warn("failed to native geocode, falling back to nominatim", error: e, trace: s);
       var request = await http.dio.get("https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lng&format=jsonv2&zoom=10", options: Options(
         headers: {
-          "User-Agent": "OpenBubbles"
+          "User-Agent": "CowBubbles"
         }
       ));
       // Logger.info("Got location $request");
@@ -4565,9 +4565,9 @@ class RustPushService extends GetxService {
         barrierDismissible: false,
         builder: (context) => AlertDialog(
           backgroundColor: Get.theme.colorScheme.properSurface,
-          title: Text("Allow OpenBubbles to share that you have notifications silenced?", style: Get.textTheme.titleLarge),
+          title: Text("Allow CowBubbles to share that you have notifications silenced?", style: Get.textTheme.titleLarge),
           content: Text(
-            "When you're using Do Not Disturb or other modes, OpenBubbles will share with your contacts that you have notifications silenced. Focus sharing on other devices will be turned off.",
+            "When you're using Do Not Disturb or other modes, CowBubbles will share with your contacts that you have notifications silenced. Focus sharing on other devices will be turned off.",
             style: Get.textTheme.bodyLarge,
           ),
           actions: [
@@ -4592,7 +4592,7 @@ class RustPushService extends GetxService {
         builder: (context) => AlertDialog(
           backgroundColor: Get.theme.colorScheme.properSurface,
           title: Text("Get a refund?", style: Get.textTheme.titleLarge),
-          content: Text(revoke ? "You're subscribed but we don't have a device for you at this time. You can come back later, or, get a refund here. After your refund, your subscription will be cancelled." : "You're subscribed but we don't have a device for you at this time. This is on us. We usually keep devices in reserve for customers in good standing, however, for some reason, all of them are offline. If you choose to take a refund, you will get the month free and can still use OpenBubbles when we have gotten our affairs in order.",
+          content: Text(revoke ? "You're subscribed but we don't have a device for you at this time. You can come back later, or, get a refund here. After your refund, your subscription will be cancelled." : "You're subscribed but we don't have a device for you at this time. This is on us. We usually keep devices in reserve for customers in good standing, however, for some reason, all of them are offline. If you choose to take a refund, you will get the month free and can still use CowBubbles when we have gotten our affairs in order.",
             style: Get.textTheme.bodyLarge,
           ),
           actions: [
@@ -4630,7 +4630,7 @@ class RustPushService extends GetxService {
           backgroundColor: Get.theme.colorScheme.properSurface,
           title: Text("VPN warning", style: Get.textTheme.titleLarge),
           content: Text(
-            "It appears you may be using a VPN. Apple blocks some VPN servers from using iMessage as real iDevices bypass them. Exclude OpenBubbles from your VPN app if you have trouble sending messages.",
+            "It appears you may be using a VPN. Apple blocks some VPN servers from using iMessage as real iDevices bypass them. Exclude CowBubbles from your VPN app if you have trouble sending messages.",
             style: Get.textTheme.bodyLarge,
           ),
           actions: [

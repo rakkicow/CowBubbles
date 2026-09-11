@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class AppleIdLogin extends StatefulWidget {
   @override
@@ -152,7 +153,7 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
               ).copyWith(height: 2),
               children: [
                 const TextSpan(
-                  text: "Use OpenBubbles with your Apple Account"
+                  text: "Use CowBubbles with your Apple Account"
                 ),
                 if (availableUser == null && controller.currentPhoneUsers.isNotEmpty && !loading) ...[
                   const TextSpan(text: "\nHaving trouble? "),
@@ -201,13 +202,18 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                               onEditingComplete: () {
                                 FocusScope.of(context).requestFocus(pwFocusNode);
                               },
+                              // Glass field: a faint fill with a rim, capsule
+                              // shaped like the buttons below it. Focus still
+                              // reads as the accent taking the rim.
                               decoration: InputDecoration(
+                                filled: true,
+                                fillColor: context.theme.colorScheme.onSurface.withOpacity(0.08),
                                 enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: context.theme.colorScheme.outline),
-                                    borderRadius: BorderRadius.circular(20)),
+                                    borderSide: BorderSide(color: context.theme.colorScheme.onSurface.withOpacity(0.18)),
+                                    borderRadius: BorderRadius.circular(GlassTokens.card)),
                                 focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: context.theme.colorScheme.primary),
-                                    borderRadius: BorderRadius.circular(20)),
+                                    borderSide: BorderSide(color: context.theme.colorScheme.primary, width: 1.5),
+                                    borderRadius: BorderRadius.circular(GlassTokens.card)),
                                 labelText: "Email or Phone Number",
                               ),
                             ),
@@ -233,13 +239,18 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                               controller: passwordController,
                               textInputAction: TextInputAction.done,
                               onSubmitted: (pass) => connect(appleIdController.text, pass),
+                              // Glass field: a faint fill with a rim, capsule
+                              // shaped like the buttons below it. Focus still
+                              // reads as the accent taking the rim.
                               decoration: InputDecoration(
+                                filled: true,
+                                fillColor: context.theme.colorScheme.onSurface.withOpacity(0.08),
                                 enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: context.theme.colorScheme.outline),
-                                    borderRadius: BorderRadius.circular(20)),
+                                    borderSide: BorderSide(color: context.theme.colorScheme.onSurface.withOpacity(0.18)),
+                                    borderRadius: BorderRadius.circular(GlassTokens.card)),
                                 focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: context.theme.colorScheme.primary),
-                                    borderRadius: BorderRadius.circular(20)),
+                                    borderSide: BorderSide(color: context.theme.colorScheme.primary, width: 1.5),
+                                    borderRadius: BorderRadius.circular(GlassTokens.card)),
                                 labelText: "Password",
                                 contentPadding: const EdgeInsets.fromLTRB(12, 24, 40, 16),
                                 suffixIcon: IconButton(
@@ -280,7 +291,7 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                                         Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            "Warning: Do not contact Apple support for help with OpenBubbles. Do not mention OpenBubbles. For assistance, join our Discord from our website.\n\n${RustPushBBUtils.modelToUser(devInfo.name)}\nS/N: ${devInfo.serial}\nmacOS ${devInfo.osVersion}",
+                                            "Warning: Do not contact Apple support for help with CowBubbles. Do not mention CowBubbles. For assistance, join our Discord from our website.\n\n${RustPushBBUtils.modelToUser(devInfo.name)}\nS/N: ${devInfo.serial}\nmacOS ${devInfo.osVersion}",
                                             textAlign: TextAlign.center,
                                             style: Get.textTheme.bodySmall,
                                           )

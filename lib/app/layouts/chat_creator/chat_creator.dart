@@ -27,6 +27,7 @@ import 'package:flutter_acrylic/window_effect.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:slugify/slugify.dart';
 import 'package:tuple/tuple.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class SelectedContact {
   final String displayName;
@@ -514,23 +515,29 @@ class ChatCreatorState extends OptimizedState<ChatCreator> {
                                         final e = selectedContacts[index];
                                         return Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                                          // Selected recipients as glass capsules: the service tint
+                                          // stays (it is how you tell an iMessage recipient from an
+                                          // SMS one), the shape joins the rest of the chrome.
                                           child: Obx(() => Material(
                                                 key: ValueKey(e.address),
                                                 color: e.iMessage.value == true
-                                                    ? context.theme.colorScheme.bubble(context, true).withOpacity(0.2)
+                                                    ? context.theme.colorScheme.bubble(context, true).withOpacity(0.18)
                                                     : e.iMessage.value == false
                                                         ? context.theme.colorScheme
                                                             .bubble(context, false)
-                                                            .withOpacity(0.2)
-                                                        : context.theme.colorScheme.properSurface,
-                                                borderRadius: BorderRadius.circular(5),
+                                                            .withOpacity(0.18)
+                                                        : context.theme.colorScheme.onSurface.withOpacity(0.10),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(GlassTokens.capsule),
+                                                  side: BorderSide(color: context.theme.colorScheme.onSurface.withOpacity(0.16), width: 1),
+                                                ),
                                                 clipBehavior: Clip.antiAlias,
                                                 child: InkWell(
                                                   onTap: () {
                                                     removeSelected(e);
                                                   },
                                                   child: Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 7.0),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7.0),
                                                     child: Row(
                                                       mainAxisAlignment: MainAxisAlignment.start,
                                                       mainAxisSize: MainAxisSize.min,
@@ -605,7 +612,10 @@ class ChatCreatorState extends OptimizedState<ChatCreator> {
                                   }
                                   return KeyEventResult.ignored;
                                 },
-                                child: TextField(
+                                child: GlassFill(
+                                  radius: GlassTokens.capsule,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                                  child: TextField(
                                   textCapitalization: TextCapitalization.sentences,
                                   focusNode: addressNode,
                                   autocorrect: false,
@@ -629,6 +639,7 @@ class ChatCreatorState extends OptimizedState<ChatCreator> {
                                   onSubmitted: (String value) {
                                     addressOnSubmitted();
                                   },
+                                ),
                                 ),
                               ),
                             ),

@@ -28,6 +28,7 @@ import 'package:bluebubbles/app/layouts/settings/widgets/settings_widgets.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/theming/theming_panel.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/misc/troubleshoot_panel.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 import 'package:bluebubbles/app/wrappers/tablet_mode_wrapper.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
@@ -124,6 +125,17 @@ class _SettingsPageState extends OptimizedState<SettingsPage> {
                       tileColor: tileColor,
                       headerColor: headerColor,
                       bodySlivers: [
+                        // iOS Settings leads with a large title that the
+                        // 50px app bar cannot hold; the bar keeps the small
+                        // one for when this scrolls under it.
+                        if (iOS)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  Space.xl, Space.md, Space.xl, Space.xs),
+                              child: Text("Settings", style: CowType.display(context)),
+                            ),
+                          ),
                         SliverList(
                           delegate: SliverChildListDelegate(
                             <Widget>[
@@ -901,7 +913,7 @@ class _SettingsPageState extends OptimizedState<SettingsPage> {
                                   const SettingsDivider(),
                                   SettingsTile(
                                     title: "Join Our Discord",
-                                    subtitle: "Join our Discord server to chat with other OpenBubbles users and the developers",
+                                    subtitle: "Join our Discord server to chat with other CowBubbles users and the developers",
                                     onTap: () async {
                                       await launchUrl(Uri(scheme: "https", host: "discord.gg", path: "qUB3ksM3Ry"), mode: LaunchMode.externalApplication);
                                     },
