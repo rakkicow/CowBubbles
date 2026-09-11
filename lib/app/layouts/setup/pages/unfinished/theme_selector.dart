@@ -79,7 +79,7 @@ class ThemeSelectorController extends GetxController {
           isFromMe: false,
           hasReactions: false,
           hasAttachments: false,
-          text: faker.lorem.words(5).join(" "),
+          text: CowRedact.text("a", 5),
           handle: Handle(
             id: -2,
             address: "Jane Doe",
@@ -92,7 +92,7 @@ class ThemeSelectorController extends GetxController {
           isFromMe: true,
           hasReactions: true,
           hasAttachments: false,
-          text: faker.lorem.words(15).join(" "),
+          text: CowRedact.text("b", 15),
           handle: Handle(
             id: -3,
             address: "You",
@@ -113,7 +113,7 @@ class ThemeSelectorController extends GetxController {
           isFromMe: false,
           hasReactions: true,
           hasAttachments: true,
-          text: faker.lorem.words(20).join(" "),
+          text: CowRedact.text("c", 20),
           handle: Handle(
             id: -1,
             address: "John Doe",
@@ -144,7 +144,7 @@ class ThemeSelectorController extends GetxController {
           isFromMe: true,
           hasReactions: false,
           hasAttachments: false,
-          text: faker.lorem.words(10).join(" "),
+          text: CowRedact.text("d", 10),
           handle: Handle(
             id: -3,
             address: "You",

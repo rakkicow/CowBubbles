@@ -11,7 +11,7 @@ import 'package:bluebubbles/services/backend/settings/settings_service.dart';
 import 'package:bluebubbles/services/backend_ui_interop/event_dispatcher.dart';
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
-import 'package:faker/faker.dart' hide Image, Color;
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,7 +45,7 @@ void hideFaceTimeOverlay(String callUuid, {bool timeout = false}) {
 Future<void> showFaceTimeOverlay(String callUuid, String caller, Uint8List? chatIcon, String link) async {
   if (ss.settings.redactedMode.value && ss.settings.hideContactInfo.value) {
     if (chatIcon != null) chatIcon = null;
-    caller = faker.person.name();
+    caller = CowRedact.name(caller);
   }
   chatIcon ??= (await rootBundle.load("assets/images/person64.png")).buffer.asUint8List();
   chatIcon = await clip(chatIcon, size: 256, circle: true);
@@ -193,7 +193,7 @@ Future<void> showOutgoingFaceTimeOverlay(RxString callState, String desc, String
 
     if (ss.settings.redactedMode.value && ss.settings.hideContactInfo.value) {
       if (chatIcon != null) chatIcon = null;
-      desc = faker.person.name();
+      desc = CowRedact.name(desc);
     }
     chatIcon ??= (await rootBundle.load("assets/images/person64.png")).buffer.asUint8List();
     chatIcon = await clip(chatIcon, size: 256, circle: true);

@@ -5,7 +5,7 @@ import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
-import 'package:faker/faker.dart';
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart' hide Condition;
 // (needed when generating objectbox model code)
@@ -28,7 +28,7 @@ class Handle {
   String? posterPath;
   bool blocked = false;
   @Transient()
-  final String fakeName = faker.person.name();
+  late final String fakeName = CowRedact.name(address);
 
   final RxnString _color = RxnString();
   String? get color => _color.value;

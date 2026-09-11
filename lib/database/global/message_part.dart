@@ -2,7 +2,7 @@ import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:collection/collection.dart';
-import 'package:faker/faker.dart';
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:tuple/tuple.dart';
 
 class MessagePart {
@@ -21,7 +21,7 @@ class MessagePart {
   }
 
   String? subject;
-  late final String fakeSubject = faker.lorem.words(subject?.split(" ").length ?? 0).join(" ");
+  late final String fakeSubject = CowRedact.text(subject ?? "", subject?.split(" ").length ?? 0);
   String? get displaySubject {
     if (subject == null) return null;
     if (ss.settings.redactedMode.value && ss.settings.hideMessageContent.value) {
@@ -30,7 +30,7 @@ class MessagePart {
     return subject;
   }
   String? text;
-  late final String fakeText = faker.lorem.words(text?.split(" ").length ?? 0).join(" ");
+  late final String fakeText = CowRedact.text(text ?? "", text?.split(" ").length ?? 0);
   String? get displayText {
     if (text == null) return null;
     if (ss.settings.redactedMode.value && ss.settings.hideMessageContent.value) {

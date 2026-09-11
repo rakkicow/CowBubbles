@@ -2,7 +2,7 @@ import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/html/contact.dart';
 import 'package:bluebubbles/database/html/objectbox.dart';
 import 'package:bluebubbles/services/services.dart';
-import 'package:faker/faker.dart';
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:get/get.dart';
 import 'package:tuple/tuple.dart';
 
@@ -16,7 +16,7 @@ class Handle {
   String? country;
   String? defaultEmail;
   String? defaultPhone;
-  final String fakeName = faker.person.name();
+  late final String fakeName = CowRedact.name(address);
 
   final contactRelation = ToOne<Contact>();
   Contact? webContact;

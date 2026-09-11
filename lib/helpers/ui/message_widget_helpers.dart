@@ -19,6 +19,8 @@ List<InlineSpan> buildMessageSpans(BuildContext context, MessagePart part, Messa
     color: colorOverride ?? (message.isFromMe! ? context.theme.colorScheme.onPrimary : context.theme.colorScheme.properOnSurface),
     fontSizeFactor: message.isBigEmoji ? 3 : 1,
   );
+  // ranges are for the real text
+  final redacted = ss.settings.redactedMode.value && ss.settings.hideMessageContent.value;
 
   if (!isNullOrEmpty(part.subject)) {
     textSpans.addAll(MessageHelper.buildEmojiText(
@@ -26,7 +28,7 @@ List<InlineSpan> buildMessageSpans(BuildContext context, MessagePart part, Messa
       textStyle.apply(fontWeightDelta: 2),
     ));
   }
-  if (part.annotations.isNotEmpty) {
+  if (part.annotations.isNotEmpty && !redacted) {
     part.annotations.forEachIndexed((i, e) {
       final range = part.annotations[i].range;
       var style = textStyle;
@@ -79,6 +81,8 @@ Future<List<InlineSpan>> buildEnrichedMessageSpans(BuildContext context, Message
     color: colorOverride ?? (message.isFromMe! ? context.theme.colorScheme.onPrimary : context.theme.colorScheme.properOnSurface),
     fontSizeFactor: message.isBigEmoji ? 3 : 1,
   );
+  // ranges are for the real text
+  final redacted = ss.settings.redactedMode.value && ss.settings.hideMessageContent.value;
   // extract rich content
   final urlRegex = RegExp(r'((https?://)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}([-a-zA-Z0-9/()@:%_.~#?&=*\[\]]*)\b');
 
@@ -168,7 +172,7 @@ Future<List<InlineSpan>> buildEnrichedMessageSpans(BuildContext context, Message
     ));
   }
   // render rich content if needed
-  if (annotations.isNotEmpty) {
+  if (annotations.isNotEmpty && !redacted) {
     annotations.forEachIndexed((i, e) {
       
       var item = e.renderExtras.firstOrNull;
