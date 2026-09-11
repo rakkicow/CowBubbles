@@ -17,4 +17,4 @@ A fork of [OpenBubbles](https://github.com/OpenBubbles/openbubbles-app) with a r
 
 ## Status
 
-very very Alpha release! Tested on 1 phone lol. Please report bugs!!
+very very Alpha release! Tested on 1 phone (S26U).. lol. Please report bugs!!
