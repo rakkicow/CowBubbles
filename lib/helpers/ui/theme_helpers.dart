@@ -6,6 +6,7 @@ import 'package:bluebubbles/utils/window_effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:get/get.dart';
+import 'package:bluebubbles/utils/cow/signature.dart';
 
 class HexColor extends Color {
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
@@ -304,32 +305,12 @@ MaterialColor createMaterialColor(Color color) {
   return MaterialColor(color.value, swatch);
 }
 
-List<Color> toColorGradient(String? str) {
+/// handle gradient, off the signature wheel
+List<Color> toColorGradient(String? str, {Brightness? brightness}) {
   if (isNullOrEmpty(str)) return [HexColor("686868"), HexColor("928E8E")];
-
-  int total = 0;
-  for (int i = 0; i < (str ?? "").length; i++) {
-    total += str!.codeUnitAt(i);
-  }
-
-  Random random = Random(total);
-  int seed = random.nextInt(7);
-
-  // These are my arbitrary weights. It's based on what I found
-  // to be a good amount of each color
-  if (seed == 0) {
-    return [HexColor("fd678d"), HexColor("ff8aa8")]; // Pink
-  } else if (seed == 1) {
-    return [HexColor("6bcff6"), HexColor("94ddfd")]; // Blue
-  } else if (seed == 2) {
-    return [HexColor("fea21c"), HexColor("feb854")]; // Orange
-  } else if (seed == 3) {
-    return [HexColor("5ede79"), HexColor("8de798")]; // Green
-  } else if (seed == 4) {
-    return [HexColor("ffca1c"), HexColor("fcd752")]; // Yellow
-  } else if (seed == 5) {
-    return [HexColor("ff534d"), HexColor("fd726a")]; // Red
-  } else {
-    return [HexColor("a78df3"), HexColor("bcabfc")]; // Purple
-  }
+  return Signature.forHandle(
+    str,
+    brightness ?? Brightness.dark,
+  ).gradient;
 }
+
