@@ -61,6 +61,91 @@ class ThemesService extends GetxService {
     ),
   ]);
 
+  /// resting theme, dark
+  final cowDarkTheme = FlexColorScheme(
+    textTheme: Typography.englishLike2021.merge(Typography.whiteMountainView),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: HexColor("F4A9C2"),
+      brightness: Brightness.dark,
+    ).copyWith(
+      background: HexColor("3B2418"),
+      onBackground: HexColor("FDFBFF"),
+      surface: HexColor("3B2418"),
+      onSurface: HexColor("FDFBFF"),
+      surfaceVariant: HexColor("4A2E20"),
+      onSurfaceVariant: HexColor("E9D9CF"),
+      primary: HexColor("F4A9C2"),
+      onPrimary: HexColor("3B2418"),
+      primaryContainer: HexColor("5A3A2C"),
+      onPrimaryContainer: HexColor("FDFBFF"),
+      secondary: HexColor("E9C9B8"),
+      onSecondary: HexColor("3B2418"),
+      secondaryContainer: HexColor("4A2E20"),
+      onSecondaryContainer: HexColor("FDFBFF"),
+      outline: HexColor("8C6F63"),
+      error: Colors.red,
+    ),
+    useMaterial3: true,
+  ).toTheme.copyWith(splashFactory: InkSparkle.splashFactory, extensions: [
+    BubbleColors(
+      iMessageBubbleColor: HexColor("F4A9C2"),
+      oniMessageBubbleColor: HexColor("3B2418"),
+      smsBubbleColor: HexColor("43CC47"),
+      onSmsBubbleColor: Colors.white,
+      receivedBubbleColor: HexColor("4A2E20"),
+      onReceivedBubbleColor: HexColor("FDFBFF"),
+    ),
+    BubbleText(
+      bubbleText: Typography.englishLike2021.bodyMedium!.copyWith(
+        fontSize: 15,
+        height: Typography.englishLike2021.bodyMedium!.height! * 0.85,
+        color: HexColor("FDFBFF"),
+      ),
+    ),
+  ]);
+
+  /// resting theme, light
+  final cowLightTheme = FlexColorScheme(
+    textTheme: Typography.englishLike2021.merge(Typography.blackMountainView),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: HexColor("F4A9C2"),
+      brightness: Brightness.light,
+    ).copyWith(
+      background: HexColor("F8F4EE"),
+      onBackground: HexColor("2B1A12"),
+      surface: HexColor("FFFDF9"),
+      onSurface: HexColor("2B1A12"),
+      surfaceVariant: HexColor("F0E8E0"),
+      onSurfaceVariant: HexColor("5A3A2C"),
+      primary: HexColor("7A4A3A"),
+      onPrimary: HexColor("FFFDF9"),
+      primaryContainer: HexColor("F4A9C2"),
+      onPrimaryContainer: HexColor("3B2418"),
+      secondary: HexColor("A8705C"),
+      onSecondary: HexColor("FFFDF9"),
+      secondaryContainer: HexColor("F7C3D4"),
+      onSecondaryContainer: HexColor("3B2418"),
+      outline: HexColor("A08A80"),
+      error: Colors.red,
+    ),
+    useMaterial3: true,
+  ).toTheme.copyWith(splashFactory: InkSparkle.splashFactory, extensions: [
+    BubbleColors(
+      iMessageBubbleColor: HexColor("F4A9C2"),
+      oniMessageBubbleColor: HexColor("3B2418"),
+      smsBubbleColor: HexColor("43CC47"),
+      onSmsBubbleColor: Colors.white,
+      receivedBubbleColor: HexColor("F0E8E0"),
+      onReceivedBubbleColor: HexColor("2B1A12"),
+    ),
+    BubbleText(
+      bubbleText: Typography.englishLike2021.bodyMedium!.copyWith(
+        fontSize: 15,
+        height: Typography.englishLike2021.bodyMedium!.height! * 0.85,
+      ),
+    ),
+  ]);
+
   final nordDarkTheme = FlexColorScheme(
     textTheme: Typography.englishLike2021.merge(Typography.whiteMountainView),
     colorScheme: ColorScheme.fromSwatch(
@@ -112,6 +197,9 @@ class ThemesService extends GetxService {
   ]);
 
   List<ThemeStruct> get defaultThemes => [
+    // [0] dark, [1] light - order matters
+    ThemeStruct(name: "CowBubbles 🌙", themeData: cowDarkTheme),
+    ThemeStruct(name: "CowBubbles ☀", themeData: cowLightTheme),
     ThemeStruct(name: "OLED Dark", themeData: oledDarkTheme),
     ThemeStruct(name: "Bright White", themeData: whiteLightTheme),
     ThemeStruct(name: "Nord Theme", themeData: nordDarkTheme),
@@ -193,6 +281,22 @@ class ThemesService extends GetxService {
     _loadTheme(context);
   }
 
+  /// recolour the music theme from a seed
+  Future<void> updateMusicThemeFromSeed(Color seed) async {
+    final darkTheme = ThemeStruct.getThemes().firstWhere((e) => e.name == "Music Theme 🌙");
+    final lightTheme = ThemeStruct.getThemes().firstWhere((e) => e.name == "Music Theme ☀");
+    lightTheme.data = lightTheme.data.copyWith(
+      colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light),
+    );
+    darkTheme.data = darkTheme.data.copyWith(
+      colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
+    );
+    if (Get.context != null) {
+      changeTheme(Get.context!, light: lightTheme, dark: darkTheme);
+    }
+  }
+
+  /// encoded artwork; MemoryImage wants encoded bytes
   void updateMusicTheme(BuildContext context, Uint8List art) async {
     final darkTheme = ThemeStruct.getThemes().firstWhere((e) => e.name == "Music Theme 🌙");
     final lightTheme = ThemeStruct.getThemes().firstWhere((e) => e.name == "Music Theme ☀");
@@ -231,7 +335,7 @@ class ThemesService extends GetxService {
     final darkName = ss.prefs.getString("previous-dark");
     ThemeStruct? previous = allThemes.firstWhereOrNull((e) => e.name == darkName);
 
-    previous ??= defaultThemes.firstWhere((element) => element.name == "OLED Dark");
+    previous ??= defaultThemes.firstWhere((element) => element.name == "CowBubbles 🌙");
 
     // Remove the previous flags
     await ss.prefs.remove("previous-dark");
@@ -244,7 +348,7 @@ class ThemesService extends GetxService {
     final lightName = ss.prefs.getString("previous-light");
     ThemeStruct? previous = allThemes.firstWhereOrNull((e) => e.name == lightName);
 
-    previous ??= defaultThemes.firstWhere((element) => element.name == "Bright White");
+    previous ??= defaultThemes.firstWhere((element) => element.name == "CowBubbles ☀");
 
     // Remove the previous flags
     await ss.prefs.remove("previous-light");

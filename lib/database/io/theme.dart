@@ -75,7 +75,7 @@ class ThemeStruct {
 
   static ThemeStruct getLightTheme() {
     final name = ss.prefs.getString("selected-light");
-    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? "Bright White")).build();
+    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? "CowBubbles ☀")).build();
     query.limit = 1;
     final result = query.findFirst();
     if (result == null) {
@@ -86,7 +86,7 @@ class ThemeStruct {
 
   static ThemeStruct getDarkTheme() {
     final name = ss.prefs.getString("selected-dark");
-    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? "OLED Dark")).build();
+    final query = Database.themes.query(ThemeStruct_.name.equals(name ?? "CowBubbles 🌙")).build();
     query.limit = 1;
     final result = query.findFirst();
     if (result == null) {
@@ -111,6 +111,10 @@ class ThemeStruct {
     List<ThemeStruct> allThemes = Database.themes.getAll();
     // sometimes the theme box is empty, this ensures it is never empty when queried
     if (allThemes.isEmpty) Database.themes.putMany(ts.defaultThemes);
+    // presets added after install
+    final have = Database.themes.getAll().map((e) => e.name).toSet();
+    final missing = ts.defaultThemes.where((e) => !have.contains(e.name)).toList();
+    if (missing.isNotEmpty) Database.themes.putMany(missing);
     allThemes = Database.themes.getAll();
     return allThemes;
   }
