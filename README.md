@@ -16,9 +16,9 @@ Everything OpenBubbles does, it still does. This is the same messaging core wear
 
 ## Screens
 
-| Music theming | iMessage apps |
-|---|---|
-| ![themes](docs/media/themes.gif) | ![games](docs/media/games.gif) |
+| Music theming | Lyrics | iMessage apps |
+|---|---|---|
+| ![themes](docs/media/themes.gif) | ![lyrics](docs/media/lyrics.gif) | ![games](docs/media/games.gif) |
 
 ## Status
 
