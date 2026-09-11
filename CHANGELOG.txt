@@ -274,7 +274,7 @@ BUILD
 
 LIMITS
 ------
-- Android arm64 only. Built and tested on a Galaxy S24. The desktop and web
+- Android arm64 only. Built and tested on a Galaxy S26 Ultra. The desktop and web
   targets still compile but none of the new interface work was designed for
   them.
 - A build from source cannot authenticate with Apple. The fairplay

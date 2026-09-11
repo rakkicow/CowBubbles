@@ -22,7 +22,7 @@ Everything OpenBubbles does, it still does. This is the same messaging core wear
 
 ## Status
 
-Alpha. Android only, arm64. Built and tested on a Galaxy S24.
+Alpha. Android only, arm64. Built and tested on a Galaxy S26 Ultra.
 
 The APK on the releases page is signed with a personal key, so it installs alongside a stock OpenBubbles install rather than updating it.
 
