@@ -728,17 +728,17 @@ class NowPlayingChip extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(GlassTokens.fill(dark)),
+                    color: GlassTokens.highlight(dark).withOpacity(GlassTokens.fill(dark)),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.center,
                       colors: [
-                        Colors.white.withOpacity(GlassTokens.sheen(dark)),
+                        GlassTokens.highlight(dark).withOpacity(GlassTokens.sheen(dark)),
                         Colors.white.withOpacity(0),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(GlassTokens.card),
-                    border: Border.all(color: Colors.white.withOpacity(GlassTokens.rimBottom(dark)), width: 1),
+                    border: Border.all(color: GlassTokens.highlight(dark).withOpacity(GlassTokens.rimBottom(dark)), width: 1),
                   ),
                   child: Row(
                     children: [

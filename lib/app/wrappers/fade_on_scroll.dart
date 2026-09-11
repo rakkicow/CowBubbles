@@ -71,9 +71,19 @@ class _FadeOnScrollState extends OptimizedState<FadeOnScroll> {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: _calculateOpacity(),
-      child: widget.child,
+    final opacity = _calculateOpacity();
+    // faded out means not painted: an Opacity of 0 still lets a BackdropFilter
+    // inside sample and blur the backdrop, which is the smear at the top of a
+    // scrolled list. maintainSize keeps the scroll extent steady.
+    return Visibility(
+      visible: opacity > 0.01,
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      child: Opacity(
+        opacity: opacity,
+        child: widget.child,
+      ),
     );
   }
 }

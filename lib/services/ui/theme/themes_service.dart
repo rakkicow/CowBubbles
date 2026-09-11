@@ -45,7 +45,7 @@ class ThemesService extends GetxService {
     useMaterial3: true,
   ).toTheme.copyWith(splashFactory: InkSparkle.splashFactory, extensions: [
     BubbleColors(
-      iMessageBubbleColor: HexColor("1982FC"),
+      iMessageBubbleColor: HexColor("0792FF"),
       oniMessageBubbleColor: Colors.white,
       smsBubbleColor: HexColor("43CC47"),
       onSmsBubbleColor: Colors.white,
@@ -68,21 +68,21 @@ class ThemesService extends GetxService {
       seedColor: HexColor("F4A9C2"),
       brightness: Brightness.dark,
     ).copyWith(
-      background: HexColor("3B2418"),
+      background: HexColor("1A0E07"),
       onBackground: HexColor("FDFBFF"),
-      surface: HexColor("3B2418"),
+      surface: HexColor("1A0E07"),
       onSurface: HexColor("FDFBFF"),
-      surfaceVariant: HexColor("4A2E20"),
+      surfaceVariant: HexColor("261509"),
       onSurfaceVariant: HexColor("E9D9CF"),
       primary: HexColor("F4A9C2"),
-      onPrimary: HexColor("3B2418"),
-      primaryContainer: HexColor("5A3A2C"),
+      onPrimary: HexColor("2A190F"),
+      primaryContainer: HexColor("3B2418"),
       onPrimaryContainer: HexColor("FDFBFF"),
       secondary: HexColor("E9C9B8"),
-      onSecondary: HexColor("3B2418"),
-      secondaryContainer: HexColor("4A2E20"),
+      onSecondary: HexColor("2A190F"),
+      secondaryContainer: HexColor("261509"),
       onSecondaryContainer: HexColor("FDFBFF"),
-      outline: HexColor("8C6F63"),
+      outline: HexColor("7A6055"),
       error: Colors.red,
     ),
     useMaterial3: true,
@@ -92,7 +92,7 @@ class ThemesService extends GetxService {
       oniMessageBubbleColor: HexColor("3B2418"),
       smsBubbleColor: HexColor("43CC47"),
       onSmsBubbleColor: Colors.white,
-      receivedBubbleColor: HexColor("4A2E20"),
+      receivedBubbleColor: HexColor("2C1A0D"),
       onReceivedBubbleColor: HexColor("FDFBFF"),
     ),
     BubbleText(
@@ -111,21 +111,21 @@ class ThemesService extends GetxService {
       seedColor: HexColor("F4A9C2"),
       brightness: Brightness.light,
     ).copyWith(
-      background: HexColor("F8F4EE"),
+      background: HexColor("F2D9CB"),
       onBackground: HexColor("2B1A12"),
-      surface: HexColor("FFFDF9"),
+      surface: HexColor("F8E6DB"),
       onSurface: HexColor("2B1A12"),
-      surfaceVariant: HexColor("F0E8E0"),
+      surfaceVariant: HexColor("EBCDBB"),
       onSurfaceVariant: HexColor("5A3A2C"),
-      primary: HexColor("7A4A3A"),
-      onPrimary: HexColor("FFFDF9"),
-      primaryContainer: HexColor("F4A9C2"),
-      onPrimaryContainer: HexColor("3B2418"),
+      primary: HexColor("F4A9C2"),
+      onPrimary: HexColor("2A190F"),
+      primaryContainer: HexColor("F7C3D4"),
+      onPrimaryContainer: HexColor("2A190F"),
       secondary: HexColor("A8705C"),
-      onSecondary: HexColor("FFFDF9"),
+      onSecondary: HexColor("2A190F"),
       secondaryContainer: HexColor("F7C3D4"),
       onSecondaryContainer: HexColor("3B2418"),
-      outline: HexColor("A08A80"),
+      outline: HexColor("A8897A"),
       error: Colors.red,
     ),
     useMaterial3: true,
@@ -135,7 +135,7 @@ class ThemesService extends GetxService {
       oniMessageBubbleColor: HexColor("3B2418"),
       smsBubbleColor: HexColor("43CC47"),
       onSmsBubbleColor: Colors.white,
-      receivedBubbleColor: HexColor("F0E8E0"),
+      receivedBubbleColor: HexColor("EBCDBB"),
       onReceivedBubbleColor: HexColor("2B1A12"),
     ),
     BubbleText(
@@ -181,7 +181,7 @@ class ThemesService extends GetxService {
     useMaterial3: true,
   ).toTheme.copyWith(splashFactory: InkSparkle.splashFactory, extensions: [
     BubbleColors(
-      iMessageBubbleColor: HexColor("1982FC"),
+      iMessageBubbleColor: HexColor("0792FF"),
       oniMessageBubbleColor: Colors.white,
       smsBubbleColor: HexColor("43CC47"),
       onSmsBubbleColor: Colors.white,
@@ -195,6 +195,12 @@ class ThemesService extends GetxService {
       ),
     ),
   ]);
+
+  /// bump when the cow palette changes, or stored rows keep the old colours
+  static const int cowThemeRevision = 4;
+
+  /// presets this app owns and keeps in step with the code
+  static const List<String> cowThemeNames = ["CowBubbles \u{1F319}", "CowBubbles \u2600"];
 
   List<ThemeStruct> get defaultThemes => [
     // [0] dark, [1] light - order matters

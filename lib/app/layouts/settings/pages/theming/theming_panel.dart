@@ -32,6 +32,62 @@ class ThemingPanelController extends StatefulController {
   final RxList<int> refreshRates = <int>[].obs;
   final RxInt currentMode = 0.obs;
   final RxBool downloadingFont = false.obs;
+  final RxBool downloadingSf = false.obs;
+  final Rx<CowSkin> cowSkin = (ss.prefs.getString("selected-light") == "Bright White"
+          ? CowSkin.iOS
+          : CowSkin.CowOS)
+      .obs;
+
+  Future<void> setCowSkin(CowSkin skin) async {
+    cowSkin.value = skin;
+    // the layout stays iOS; the skin picks which theme pair is in use
+    await cm.setAllInactive();
+    ss.settings.skin.value = Skins.iOS;
+    ss.saveSettings();
+    final light = ThemeStruct.findOne(skin.lightTheme);
+    final dark = ThemeStruct.findOne(skin.darkTheme);
+    if (light != null) ts.changeTheme(Get.context!, light: light, dark: dark);
+    await ss.prefs.setString("selected-light", skin.lightTheme);
+    await ss.prefs.setString("selected-dark", skin.darkTheme);
+    eventDispatcher.emit('theme-update', null);
+  }
+  final Rx<CowIcon> cowIcon = (CowIcon.values.firstWhereOrNull((e) => e.key == ss.prefs.getString("cow-icon")) ?? CowIcon.face).obs;
+
+  Future<void> setCowIcon(BuildContext context, CowIcon icon) async {
+    if (cowIcon.value == icon) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.theme.colorScheme.properSurface,
+        title: Text("Change app icon?", style: context.theme.textTheme.titleLarge),
+        content: Text(
+          "The launcher will show the ${icon.label} icon. It can take a moment to redraw, and a few launchers need a restart.",
+          style: context.theme.textTheme.bodyLarge,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text("Cancel", style: context.theme.textTheme.bodyLarge!.copyWith(color: context.theme.colorScheme.primary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text("Change", style: context.theme.textTheme.bodyLarge!.copyWith(color: context.theme.colorScheme.primary)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await mcs.invokeMethod("set-launcher-icon", {"icon": icon.key});
+      cowIcon.value = icon;
+      await ss.prefs.setString("cow-icon", icon.key);
+      showSnackbar("Notice", "App icon changed");
+    } catch (e, stack) {
+      Logger.error("Failed to set launcher icon!", error: e, trace: stack);
+      showSnackbar("Error", "Could not change the app icon");
+    }
+  }
+  final RxDouble sfProgress = 0.0.obs;
   final RxnDouble progress = RxnDouble();
   final RxnInt totalSize = RxnInt();
 
@@ -131,17 +187,14 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                 SettingsSection(
                   backgroundColor: tileColor,
                   children: [
-                    Obx(() => SettingsOptions<Skins>(
-                      initial: ss.settings.skin.value,
+                    Obx(() => SettingsOptions<CowSkin>(
+                      initial: controller.cowSkin.value,
                       onChanged: (val) async {
                         if (val == null) return;
-                        await cm.setAllInactive();
-                        ss.settings.skin.value = val;
-                        saveSettings();
+                        await controller.setCowSkin(val);
                         setState(() {});
-                        eventDispatcher.emit('theme-update', null);
                       },
-                      options: Skins.values,
+                      options: CowSkin.values,
                       textProcessing: (val) => val.name,
                       capitalize: false,
                       title: "App Skin",
@@ -292,6 +345,64 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         return const SizedBox.shrink();
                       }),
                     ]
+                  ),
+                if (!kIsWeb && !kIsDesktop)
+                  SettingsHeader(
+                      iosSubtitle: iosSubtitle,
+                      materialSubtitle: materialSubtitle,
+                      text: "Icon Picker"),
+                if (!kIsWeb && !kIsDesktop)
+                  SettingsSection(
+                    backgroundColor: tileColor,
+                    children: [
+                      Obx(() => Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                        child: Row(
+                          children: CowIcon.values.map((icon) {
+                            final selected = controller.cowIcon.value == icon;
+                            return Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: GestureDetector(
+                                  onTap: () => controller.setCowIcon(context, icon),
+                                  child: Column(
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 180),
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(22),
+                                          border: Border.all(
+                                            color: selected
+                                                ? context.theme.colorScheme.primary
+                                                : Colors.transparent,
+                                            width: 2.5,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: Image.asset(icon.asset, width: 64, height: 64),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        icon.label,
+                                        style: context.theme.textTheme.bodyMedium!.copyWith(
+                                          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      )),
+                      SettingsSubtitle(
+                        subtitle: "The launcher may take a moment to redraw, and some launchers need a restart.",
+                      ),
+                    ],
                   ),
                 if (!kIsWeb && !kIsDesktop)
                   SettingsHeader(
@@ -652,42 +763,39 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         if (fs.sfFontExistsOnDisk.value) return const SizedBox.shrink();
                         return SettingsTile(
                           onTap: () async {
-                            Future<void> install(Uint8List data) async {
-                              if (!kIsWeb) {
-                                final file = File("${fs.appDocDir.path}/font/sfpro.ttf");
-                                await file.create(recursive: true);
-                                await file.writeAsBytes(data);
+                            if (controller.downloadingSf.value) return;
+                            controller.downloadingSf.value = true;
+                            try {
+                              final loader = FontLoader(sfProFamily);
+                              for (var i = 0; i < sfProFontUrls.length; i++) {
+                                final response = await http.downloadFromUrl(
+                                  sfProFontUrls[i],
+                                  progress: (current, total) {
+                                    if (total > 0 && current <= total) {
+                                      controller.sfProgress.value = (i + current / total) / sfProFontUrls.length;
+                                    }
+                                  },
+                                );
+                                if (response.statusCode != 200) throw "status ${response.statusCode}";
+                                final Uint8List data = response.data;
+                                if (!kIsWeb) {
+                                  final file = File("${fs.appDocDir.path}/font/${sfProFontFiles[i]}");
+                                  await file.create(recursive: true);
+                                  await file.writeAsBytes(data);
+                                }
+                                loader.addFont(Future<ByteData>.value(ByteData.view(data.buffer)));
                               }
-                              final loader = FontLoader("SFPro");
-                              loader.addFont(Future<ByteData>.value(ByteData.view(data.buffer)));
                               await loader.load();
                               fs.sfFontExistsOnDisk.value = true;
                               showSnackbar("Notice", "SF Pro loaded");
-                            }
-                            if (kIsWeb || sfProFontUrl.isEmpty) {
-                              try {
-                                final res = await FilePicker.platform.pickFiles(withData: true, type: FileType.custom, allowedExtensions: ["ttf", "otf"]);
-                                if (res == null || res.files.isEmpty || res.files.first.bytes == null) return;
-                                await install(res.files.first.bytes!);
-                              } catch (e, stack) {
-                                Logger.error("Failed to load font!", error: e, trace: stack);
-                                showSnackbar("Error", "Failed to load font file. Please make sure it is a valid ttf.");
-                              }
-                              return;
-                            }
-                            try {
-                              final response = await http.downloadFromUrl(sfProFontUrl);
-                              if (response.statusCode == 200) {
-                                await install(response.data as Uint8List);
-                              } else {
-                                showSnackbar("Error", "Failed to fetch font");
-                              }
                             } catch (e, stack) {
                               Logger.error("Failed to fetch font!", error: e, trace: stack);
                               showSnackbar("Error", "Failed to fetch font! Error: ${e.toString()}");
                             }
+                            controller.downloadingSf.value = false;
+                            controller.sfProgress.value = 0;
                           },
-                          title: kIsWeb || sfProFontUrl.isEmpty ? "Import SF Pro Font File" : "Download SF Pro Font",
+                          title: "Download${controller.downloadingSf.value ? "ing" : ""} SF Pro Font${controller.downloadingSf.value ? " (${(controller.sfProgress.value * 100).floor()}%)" : ""}",
                           subtitle: "Apple's San Francisco, for the lyrics and the now-playing chip. Bricolage Grotesque stands in until it is loaded.",
                         );
                       }),
@@ -712,6 +820,22 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         } else {
                           return const SizedBox.shrink();
                         }
+                      }),
+                      Obx(() {
+                        if (!fs.sfFontExistsOnDisk.value) return const SizedBox.shrink();
+                        return SettingsTile(
+                          onTap: () async {
+                            if (!kIsWeb) {
+                              for (final name in sfProFontFiles) {
+                                final file = File("${fs.appDocDir.path}/font/$name");
+                                if (await file.exists()) await file.delete();
+                              }
+                            }
+                            fs.sfFontExistsOnDisk.value = false;
+                            showSnackbar("Notice", "Font removed, restart the app for changes to take effect");
+                          },
+                          title: "Delete SF Pro Font",
+                        );
                       }),
                     ],
                   ),

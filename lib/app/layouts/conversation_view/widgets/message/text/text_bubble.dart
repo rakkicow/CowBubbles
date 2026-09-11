@@ -81,11 +81,24 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
   }
 
   /// outgoing colour; album while playing, else the signature
+  /// text on the outgoing bubble, picked off the fill so pink stays readable
+  Color _outgoingInk(BuildContext context) {
+    final fill = _outgoingColor(context);
+    return fill.computeLuminance() > 0.45 ? const Color(0xFF2A190F) : const Color(0xFFFDFBFF);
+  }
+
   Color _outgoingColor(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     final np = cowMusic.current;
     if (np != null) return np.palette.popColor(dark: dark);
+
+    // one colour for every thread unless colourful bubbles is on. the theme
+    // owns it: pink under CowOS, apple blue under the iOS pair
+    if (!ss.settings.colorfulBubbles.value) {
+      return (context.theme.extensions[BubbleColors] as BubbleColors?)?.iMessageBubbleColor
+          ?? context.theme.colorScheme.primary;
+    }
 
     final chat = controller.cvController?.chat;
     if (chat == null) return context.theme.colorScheme.primary;
@@ -176,7 +189,8 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
             colorOverride: message.dateScheduled != null ? context.theme.colorScheme.primary :
                 selected ? context.theme.colorScheme.onTertiaryContainer
                 : ss.settings.colorfulBubbles.value && !message.isFromMe!
-                ? getBubbleColors().first.oppositeLightenOrDarken(75) : null,
+                ? getBubbleColors().first.oppositeLightenOrDarken(75)
+                : message.isFromMe! && !message.isBigEmoji ? _outgoingInk(context) : null,
             hideBodyText: widget.subjectOnly,
           ),
           initialData: buildMessageSpans(
@@ -243,8 +257,8 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
         child = CustomPaint(
           foregroundPainter: BubbleRimPainter(
             isFromMe: false,
-            top: Colors.white.withOpacity(GlassTokens.rimTop(dark) * 0.7),
-            bottom: Colors.white.withOpacity(GlassTokens.rimBottom(dark) * 0.7),
+            top: GlassTokens.highlight(dark).withOpacity(GlassTokens.rimTop(dark) * 0.7),
+            bottom: GlassTokens.highlight(dark).withOpacity(GlassTokens.rimBottom(dark) * 0.7),
           ),
           child: child,
         );

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'dart:core';
 
 import 'package:bluebubbles/helpers/ui/theme_helpers.dart';
@@ -115,6 +116,17 @@ class ThemeStruct {
     final have = Database.themes.getAll().map((e) => e.name).toSet();
     final missing = ts.defaultThemes.where((e) => !have.contains(e.name)).toList();
     if (missing.isNotEmpty) Database.themes.putMany(missing);
+    // the cow presets are ours: rewrite stored rows when the palette moves, or
+    // an install keeps whatever colours it first saved
+    if (ss.prefs.getInt("cow-theme-revision") != ThemesService.cowThemeRevision) {
+      final stored = Database.themes.getAll();
+      for (final preset in ts.defaultThemes.where((e) => ThemesService.cowThemeNames.contains(e.name))) {
+        final existing = stored.firstWhereOrNull((e) => e.name == preset.name);
+        if (existing != null) preset.id = existing.id;
+        Database.themes.put(preset);
+      }
+      ss.prefs.setInt("cow-theme-revision", ThemesService.cowThemeRevision);
+    }
     allThemes = Database.themes.getAll();
     return allThemes;
   }

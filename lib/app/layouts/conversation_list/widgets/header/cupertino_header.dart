@@ -54,19 +54,22 @@ class CupertinoHeader extends StatelessWidget {
 
   final ConversationListController controller;
 
+  static double topMarginFor(BuildContext context) =>
+      context.orientation == Orientation.landscape && context.isPhone
+          ? 20
+          : kIsDesktop || kIsWeb
+              ? 40
+              : kToolbarHeight + 30;
+
+  /// what the list has to clear: margin, panel, bottom gap
+  static double heightFor(BuildContext context) => topMarginFor(context) + 68 + 5;
+
   @override
   Widget build(BuildContext context) {
-    final double topMargin = context.orientation == Orientation.landscape && context.isPhone
-        ? 20
-        : kIsDesktop || kIsWeb
-            ? 40
-            : kToolbarHeight + 30;
+    final double topMargin = topMarginFor(context);
 
-    return SliverToBoxAdapter(
-      child: FadeOnScroll(
-        scrollController: controller.iosScrollController,
-        zeroOpacityOffset: topMargin + 15,
-        child: Container(
+    return RepaintBoundary(
+      child: Container(
           margin: EdgeInsets.only(
             top: topMargin,
             left: Space.md,
@@ -165,7 +168,6 @@ class CupertinoHeader extends StatelessWidget {
           }),
           ),
         ),
-      ),
     );
   }
 }

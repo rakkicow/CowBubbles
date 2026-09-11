@@ -74,13 +74,13 @@ class CupertinoHeader extends StatelessWidget implements PreferredSizeWidget {
                 children: [
               Expanded(child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(GlassTokens.fill(
+                  color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.fill(
                       context.theme.brightness == Brightness.dark)),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.center,
                     colors: [
-                      Colors.white.withOpacity(GlassTokens.sheen(
+                      GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.sheen(
                           context.theme.brightness == Brightness.dark)),
                       Colors.white.withOpacity(0),
                     ],

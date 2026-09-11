@@ -14,15 +14,32 @@ class GlassTokens {
 
   static const double blur = 24;
 
+  /// the palette the glass is tinted with: cream paper, brown hide, pink nose
+  static const Color cream = Color(0xFFFBEDE4);
+  static const Color brown = Color(0xFF3B2418);
+  static const Color pink = Color(0xFFF4A9C2);
+
+  /// surface tint. white on a light screen reads as a hole, not as glass;
+  /// the cream here is a shade above the page so the panel lifts off it
+  static Color tint(bool dark) => dark ? brown : cream;
+
+  /// what the rim and sheen are lit with
+  static Color highlight(bool dark) => dark ? cream : Colors.white;
+
   /// fill alpha
-  static double fill(bool dark) => dark ? 0.10 : 0.55;
+  static double fill(bool dark) => dark ? 0.22 : 0.82;
 
   /// rim alphas, top vs bottom
-  static double rimTop(bool dark) => dark ? 0.34 : 0.85;
-  static double rimBottom(bool dark) => dark ? 0.08 : 0.35;
+  static double rimTop(bool dark) => dark ? 0.34 : 0.95;
+  static double rimBottom(bool dark) => dark ? 0.08 : 0.45;
+
+  /// a soft drop under a light panel, so it reads as sitting above the page
+  static List<BoxShadow> lift(bool dark) => dark
+      ? const []
+      : const [BoxShadow(color: Color(0x1A3B2418), blurRadius: 18, offset: Offset(0, 6))];
 
   /// sheen strength
-  static double sheen(bool dark) => dark ? 0.14 : 0.45;
+  static double sheen(bool dark) => dark ? 0.10 : 0.38;
 }
 
 /// full glass: backdrop, fill, rim, sheen
@@ -86,27 +103,28 @@ class GlassFill extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final r = BorderRadius.circular(radius);
-    final base = tint ?? (dark ? Colors.white : Colors.white);
+    final base = tint ?? GlassTokens.tint(dark);
     final alpha = fillAlpha ?? GlassTokens.fill(dark);
 
     return CustomPaint(
       foregroundPainter: _RimPainter(
         radius: radius,
-        top: Colors.white.withOpacity(GlassTokens.rimTop(dark)),
-        bottom: Colors.white.withOpacity(GlassTokens.rimBottom(dark)),
+        top: GlassTokens.highlight(dark).withOpacity(GlassTokens.rimTop(dark)),
+        bottom: GlassTokens.highlight(dark).withOpacity(GlassTokens.rimBottom(dark)),
       ),
       child: Container(
         padding: padding,
         decoration: BoxDecoration(
           borderRadius: r,
           color: base.withOpacity(alpha),
+          boxShadow: GlassTokens.lift(dark),
           // sheen
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.center,
             colors: [
-              Colors.white.withOpacity(GlassTokens.sheen(dark)),
-              Colors.white.withOpacity(0),
+              GlassTokens.highlight(dark).withOpacity(GlassTokens.sheen(dark)),
+              GlassTokens.highlight(dark).withOpacity(0),
             ],
           ),
         ),

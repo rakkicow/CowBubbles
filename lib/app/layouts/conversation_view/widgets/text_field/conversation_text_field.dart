@@ -590,12 +590,12 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                                                     ),
                                                     decoration: BoxDecoration(
                                                       border: Border.fromBorderSide(BorderSide(
-                                                        color: Colors.white.withOpacity(GlassTokens.rimTop(
+                                                        color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.rimTop(
                                                             context.theme.brightness == Brightness.dark)),
                                                         width: 1,
                                                       )),
                                                       borderRadius: BorderRadius.circular(GlassTokens.card),
-                                                      color: Colors.white.withOpacity(GlassTokens.fill(
+                                                      color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.fill(
                                                           context.theme.brightness == Brightness.dark)),
                                                     ),
                                                   );
@@ -888,13 +888,13 @@ class TextFieldComponentState extends State<TextFieldComponent> {
         // glass capsule; Border can't vary, so the sheen does the top-lit read
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(GlassTokens.fill(
+            color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.fill(
                 context.theme.brightness == Brightness.dark)),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.center,
               colors: [
-                Colors.white.withOpacity(GlassTokens.sheen(
+                GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.sheen(
                     context.theme.brightness == Brightness.dark)),
                 Colors.white.withOpacity(0),
               ],
@@ -902,7 +902,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
             border: Border.fromBorderSide(BorderSide(
               color: (isRecording & iOS)
                   ? context.theme.colorScheme.primary
-                  : Colors.white.withOpacity(GlassTokens.rimTop(
+                  : GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.rimTop(
                       context.theme.brightness == Brightness.dark)),
               width: (isRecording & iOS) ? 1.5 : 1,
             )),

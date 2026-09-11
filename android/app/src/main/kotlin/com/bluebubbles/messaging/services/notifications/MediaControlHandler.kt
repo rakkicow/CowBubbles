@@ -6,11 +6,7 @@ import com.bluebubbles.messaging.models.MethodCallHandlerImpl
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
-/// Transport controls for whatever is playing.
-///
-/// Drives the media session the listener is already watching, so tapping the
-/// now-playing chip pauses the same player that is colouring the screen - not
-/// a separate audio session of our own.
+// transport for the session the listener is already watching
 class MediaControlHandler: MethodCallHandlerImpl() {
     companion object {
         const val tag = "media-control"

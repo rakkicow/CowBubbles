@@ -1,4 +1,5 @@
 import 'package:bluebubbles/helpers/helpers.dart';
+import 'package:bluebubbles/utils/cow/cow_fonts.dart';
 import 'package:bluebubbles/database/database.dart' as db;
 import 'package:bluebubbles/services/ui/contact_service.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
@@ -84,13 +85,18 @@ class FilesystemService extends GetxService {
         );
         await fontLoader.load();
       }
-      // SF Pro for the lyrics, fetched or imported from Settings > Theming.
-      final sf = File("${fs.appDocDir.path}/font/sfpro.ttf");
-      if (await sf.exists()) {
-        final bytes = await sf.readAsBytes();
-        sfFontExistsOnDisk.value = true;
-        final loader = FontLoader("SFPro");
+      // sf pro, downloaded from settings
+      final loader = FontLoader(sfProFamily);
+      var found = 0;
+      for (final name in sfProFontFiles) {
+        final f = File("${fs.appDocDir.path}/font/$name");
+        if (!await f.exists()) continue;
+        final bytes = await f.readAsBytes();
         loader.addFont(Future<ByteData>.value(ByteData.view(bytes.buffer)));
+        found++;
+      }
+      if (found > 0) {
+        sfFontExistsOnDisk.value = true;
         await loader.load();
       }
     } else {

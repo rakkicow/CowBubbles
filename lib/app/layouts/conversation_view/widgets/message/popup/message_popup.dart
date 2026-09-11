@@ -363,10 +363,10 @@ class _MessagePopupState extends OptimizedState<MessagePopup> with SingleTickerP
                                     child: Container(
                                       padding: const EdgeInsets.all(5).add(const EdgeInsets.only(bottom: 15)),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(GlassTokens.fill(
+                                        color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.fill(
                                             context.theme.brightness == Brightness.dark) + 0.06),
                                         border: Border.all(
-                                          color: Colors.white.withOpacity(GlassTokens.rimTop(
+                                          color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.rimTop(
                                               context.theme.brightness == Brightness.dark) * 0.8),
                                           width: 1,
                                         ),
@@ -483,7 +483,7 @@ class _MessagePopupState extends OptimizedState<MessagePopup> with SingleTickerP
                               : ClipPath(
                           clipper: ReactionClipper(isFromMe: message.isFromMe!),
                           child: Material(
-                            color: Colors.white.withOpacity(GlassTokens.fill(
+                            color: GlassTokens.highlight(Theme.of(context).brightness == Brightness.dark).withOpacity(GlassTokens.fill(
                                 context.theme.brightness == Brightness.dark) + 0.10),
                             child: Container(
                               width: iosSize,

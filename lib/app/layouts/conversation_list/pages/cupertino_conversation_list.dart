@@ -109,8 +109,11 @@ class CupertinoConversationListState
                       controller: controller.iosScrollController,
                       physics: ts.scrollPhysics,
                       slivers: <Widget>[
+                        // the list runs under the floating header
                         if (!showArchived && !showUnknown && !showDeleted)
-                          CupertinoHeader(controller: controller),
+                          SliverToBoxAdapter(
+                            child: SizedBox(height: CupertinoHeader.heightFor(context)),
+                          ),
                         Obx(() {
                           ns.listener.value;
                           final _chats = showDeleted
@@ -374,7 +377,12 @@ class CupertinoConversationListState
                     )),
               ),
               if (!showArchived && !showUnknown && !showDeleted)
-                CupertinoMiniHeader(controller: controller),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: CupertinoHeader(controller: controller),
+                ),
               if (chats.chats.isEmpty && chats.loadedChatBatch.value && !ss.settings.isDumb.value)
                 Positioned(
                   child: Container(

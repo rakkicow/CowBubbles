@@ -327,6 +327,7 @@ flutter:
     - assets/images/unplayable-video.png
     - assets/icon/icon.png
     - assets/icon/cow_icon.png
+    - assets/icon/cow_icon_bubbles.png
     - assets/changelog/changelog.md
     - assets/icon/icon.ico
     - assets/badges/badge-1.ico

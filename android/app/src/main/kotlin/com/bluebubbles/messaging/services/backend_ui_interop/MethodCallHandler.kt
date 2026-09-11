@@ -99,6 +99,7 @@ class MethodCallHandler {
             OpenExistingContactRequestHandler.tag -> OpenExistingContactRequestHandler().handleMethodCall(call, result, context)
             OpenCalendarRequestHandler.tag -> OpenCalendarRequestHandler().handleMethodCall(call, result, context)
             MediaControlHandler.tag -> MediaControlHandler().handleMethodCall(call, result, context)
+            LauncherIconHandler.tag -> LauncherIconHandler().handleMethodCall(call, result, context)
             OpenAutofillProviderSettingsHandler.tag -> OpenAutofillProviderSettingsHandler().handleMethodCall(call, result, context)
             StartGoogleDuoRequestHandler.tag -> StartGoogleDuoRequestHandler().handleMethodCall(call, result, context)
             CheckChromeOsHandler.tag -> CheckChromeOsHandler().handleMethodCall(call, result, context)
