@@ -57,6 +57,7 @@ import com.bluebubbles.messaging.services.system.NativeSyncIsolateHandler
 import com.bluebubbles.messaging.services.system.OpenSMSAppHandler
 import com.bluebubbles.messaging.services.system.RecentContactsRequestHandler
 import com.bluebubbles.messaging.services.system.ShizukuGrantPermissionHandler
+import com.bluebubbles.messaging.services.notifications.MediaControlHandler
 import com.bluebubbles.messaging.services.system.ZenModeSetupHandler
 import com.bluebubbles.messaging.services.system.ZenModeUUIDHandler
 import io.flutter.plugin.common.MethodCall
@@ -97,6 +98,7 @@ class MethodCallHandler {
             NewContactFormRequestHandler.tag -> NewContactFormRequestHandler().handleMethodCall(call, result, context)
             OpenExistingContactRequestHandler.tag -> OpenExistingContactRequestHandler().handleMethodCall(call, result, context)
             OpenCalendarRequestHandler.tag -> OpenCalendarRequestHandler().handleMethodCall(call, result, context)
+            MediaControlHandler.tag -> MediaControlHandler().handleMethodCall(call, result, context)
             OpenAutofillProviderSettingsHandler.tag -> OpenAutofillProviderSettingsHandler().handleMethodCall(call, result, context)
             StartGoogleDuoRequestHandler.tag -> StartGoogleDuoRequestHandler().handleMethodCall(call, result, context)
             CheckChromeOsHandler.tag -> CheckChromeOsHandler().handleMethodCall(call, result, context)

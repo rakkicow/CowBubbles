@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
+import 'package:bluebubbles/utils/cow/now_playing.dart';
 
 MethodChannelService mcs = Get.isRegistered<MethodChannelService>() ? Get.find<MethodChannelService>() : Get.put(MethodChannelService());
 
@@ -361,12 +362,24 @@ class MethodChannelService extends GetxService {
         await Database.waitForInit();
         if (!ss.settings.colorsFromMedia.value) return Future.value(true);
 
-        final Uint8List art = call.arguments["albumArt"];
-        if (Get.context != null && (!isRunning || art != previousArt)) {
-          ts.updateMusicTheme(Get.context!, art);
-          isRunning = false;
+        // The listener now sends the whole track, not just the artwork, so the
+        // UI can show what is playing and time lyrics against it.
+        await cowMusic.update(call.arguments as Map);
+
+        // Recolour the Material scheme from the palette we just extracted.
+        // The artwork now crosses the channel as raw pixels, which MemoryImage
+        // cannot read - seeding from the dominant colour is both correct and
+        // considerably faster than quantising the image a second time.
+        final np = cowMusic.current;
+        if (np != null && Get.context != null) {
+          await ts.updateMusicThemeFromSeed(np.palette.dominant);
         }
 
+        return Future.value(true);
+      case "MediaStopped":
+        // Nothing is playing: drop back to the app's own colours rather than
+        // holding the last song's palette indefinitely.
+        cowMusic.stopped();
         return Future.value(true);
       case "incoming-facetime":
         await Database.waitForInit();
