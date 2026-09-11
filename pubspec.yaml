@@ -278,7 +278,14 @@ flutter:
   #     - asset: assets/fonts/AppleColorEmoji.ttf
   shaders:
     - shaders/vertical_blur_gradient.frag
+    - shaders/album_warp.frag
   fonts:
+    - family: BricolageGrotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-Variable.ttf
+    - family: InstrumentSans
+      fonts:
+        - asset: assets/fonts/InstrumentSans-Variable.ttf
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-VariableFont_opsz,wght.ttf
@@ -319,6 +326,7 @@ flutter:
     - assets/images/no-video-preview.png
     - assets/images/unplayable-video.png
     - assets/icon/icon.png
+    - assets/icon/cow_icon.png
     - assets/changelog/changelog.md
     - assets/icon/icon.ico
     - assets/badges/badge-1.ico

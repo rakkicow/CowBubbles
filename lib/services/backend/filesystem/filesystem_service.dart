@@ -25,6 +25,7 @@ class FilesystemService extends GetxService {
   late final Uint8List noVideoPreviewIcon;
   late final Uint8List unplayableVideoIcon;
   final RxBool fontExistsOnDisk = false.obs;
+  final RxBool sfFontExistsOnDisk = false.obs;
 
   Future<String> get downloadsDirectory async {
     if (kIsWeb) throw "Cannot get downloads directory on web!";
@@ -82,6 +83,15 @@ class FilesystemService extends GetxService {
           Future<ByteData>.value(cachedFontBytes),
         );
         await fontLoader.load();
+      }
+      // SF Pro for the lyrics, fetched or imported from Settings > Theming.
+      final sf = File("${fs.appDocDir.path}/font/sfpro.ttf");
+      if (await sf.exists()) {
+        final bytes = await sf.readAsBytes();
+        sfFontExistsOnDisk.value = true;
+        final loader = FontLoader("SFPro");
+        loader.addFont(Future<ByteData>.value(ByteData.view(bytes.buffer)));
+        await loader.load();
       }
     } else {
       final idbFactory = idbFactoryBrowser;

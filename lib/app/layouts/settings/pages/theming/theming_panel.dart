@@ -14,6 +14,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:bluebubbles/utils/cow/cow_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
@@ -21,6 +22,10 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:idb_shim/idb.dart';
 import 'package:universal_io/io.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
+import 'package:bluebubbles/utils/cow/music_background.dart';
+import 'package:bluebubbles/utils/cow/now_playing.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
 
 class ThemingPanelController extends StatefulController {
   final RxList<DisplayMode> modes = <DisplayMode>[].obs;
@@ -288,6 +293,71 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                       }),
                     ]
                   ),
+                if (!kIsWeb && !kIsDesktop)
+                  SettingsHeader(
+                      iosSubtitle: iosSubtitle,
+                      materialSubtitle: materialSubtitle,
+                      text: "Music"),
+                if (!kIsWeb && !kIsDesktop)
+                  SettingsSection(
+                    backgroundColor: tileColor,
+                    children: [
+                      // now playing
+                      const _NowPlayingPreview(),
+                    if (!kIsWeb && !kIsDesktop)
+                      Obx(() => SettingsSwitch(
+                          onChanged: (bool val) async {
+                            if (val) {
+                              await mcs.invokeMethod("request-notification-listener-permission");
+                              try {
+                                await mcs.invokeMethod("start-notification-listener");
+                                // disable monet theming if music theme enabled
+                                ss.settings.monetTheming.value = Monet.none;
+                                saveSettings();
+                                var allThemes = ThemeStruct.getThemes();
+                                var currentLight = ThemeStruct.getLightTheme();
+                                var currentDark = ThemeStruct.getDarkTheme();
+                                await ss.prefs.setString("previous-light", currentLight.name);
+                                await ss.prefs.setString("previous-dark", currentDark.name);
+                                await ts.changeTheme(
+                                    context,
+                                    light: allThemes.firstWhere((element) => element.name == "Music Theme ☀"),
+                                    dark: allThemes.firstWhere((element) => element.name == "Music Theme 🌙")
+                                );
+                                ss.settings.colorsFromMedia.value = val;
+                                saveSettings();
+                              } catch (e) {
+                                showSnackbar(
+                                    "Error", "Something went wrong, please ensure you granted the permission correctly!");
+                              }
+                            } else {
+                              var allThemes = ThemeStruct.getThemes();
+                              final lightName = ss.prefs.getString("previous-light");
+                              final darkName = ss.prefs.getString("previous-dark");
+                              var previousLight = allThemes.firstWhere((e) => e.name == lightName);
+                              var previousDark = allThemes.firstWhere((e) => e.name == darkName);
+                              await ss.prefs.remove("previous-light");
+                              await ss.prefs.remove("previous-dark");
+                              await ts.changeTheme(context, light: previousLight, dark: previousDark);
+                              ss.settings.colorsFromMedia.value = val;
+                              saveSettings();
+                            }
+                          },
+                          initialVal: ss.settings.colorsFromMedia.value,
+                          title: "Colors from Media",
+                          backgroundColor: tileColor,
+                          subtitle:
+                          "Pull app colors from currently playing media",
+                        ),
+                      ),
+                      const SettingsSubtitle(
+                        unlimitedSpace: true,
+                        subtitle: "Colours the conversation background from the album art, "
+                            "and shows the current lyric in the composer. Needs "
+                            "notification access to read the media session.",
+                      ),
+                    ],
+                  ),
                 SettingsHeader(
                     iosSubtitle: iosSubtitle,
                     materialSubtitle: materialSubtitle,
@@ -356,59 +426,6 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         ),
                       ),
                     if (!kIsWeb && !kIsDesktop && ts.monetPalette != null)
-                      const SettingsDivider(padding: EdgeInsets.only(left: 16.0)),
-                    if (!kIsWeb && !kIsDesktop)
-                      Obx(() => SettingsSwitch(
-                          onChanged: (bool val) async {
-                            if (val) {
-                              await mcs.invokeMethod("request-notification-listener-permission");
-                              try {
-                                await mcs.invokeMethod("start-notification-listener");
-                                // disable monet theming if music theme enabled
-                                ss.settings.monetTheming.value = Monet.none;
-                                saveSettings();
-                                var allThemes = ThemeStruct.getThemes();
-                                var currentLight = ThemeStruct.getLightTheme();
-                                var currentDark = ThemeStruct.getDarkTheme();
-                                await ss.prefs.setString("previous-light", currentLight.name);
-                                await ss.prefs.setString("previous-dark", currentDark.name);
-                                await ts.changeTheme(
-                                    context,
-                                    light: allThemes.firstWhere((element) => element.name == "Music Theme ☀"),
-                                    dark: allThemes.firstWhere((element) => element.name == "Music Theme 🌙")
-                                );
-                                ss.settings.colorsFromMedia.value = val;
-                                saveSettings();
-                              } catch (e) {
-                                showSnackbar(
-                                    "Error", "Something went wrong, please ensure you granted the permission correctly!");
-                              }
-                            } else {
-                              var allThemes = ThemeStruct.getThemes();
-                              final lightName = ss.prefs.getString("previous-light");
-                              final darkName = ss.prefs.getString("previous-dark");
-                              var previousLight = allThemes.firstWhere((e) => e.name == lightName);
-                              var previousDark = allThemes.firstWhere((e) => e.name == darkName);
-                              await ss.prefs.remove("previous-light");
-                              await ss.prefs.remove("previous-dark");
-                              await ts.changeTheme(context, light: previousLight, dark: previousDark);
-                              ss.settings.colorsFromMedia.value = val;
-                              saveSettings();
-                            }
-                          },
-                          initialVal: ss.settings.colorsFromMedia.value,
-                          title: "Colors from Media",
-                          backgroundColor: tileColor,
-                          subtitle:
-                          "Pull app colors from currently playing media",
-                        ),
-                      ),
-                    if (!kIsWeb && !kIsDesktop)
-                      const SettingsSubtitle(
-                        unlimitedSpace: true,
-                        subtitle: "Note: Requires full notification access. Enabling this option will set a custom Music Theme as the selected theme. Media art with mostly blacks or whites may not produce any change in theming.",
-                      ),
-                    if (!kIsWeb && !kIsDesktop)
                       const SettingsDivider(padding: EdgeInsets.only(left: 16.0)),
                     Obx(() => SettingsSwitch(
                       onChanged: (bool val) {
@@ -632,6 +649,49 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         }
                       }),
                       Obx(() {
+                        if (fs.sfFontExistsOnDisk.value) return const SizedBox.shrink();
+                        return SettingsTile(
+                          onTap: () async {
+                            Future<void> install(Uint8List data) async {
+                              if (!kIsWeb) {
+                                final file = File("${fs.appDocDir.path}/font/sfpro.ttf");
+                                await file.create(recursive: true);
+                                await file.writeAsBytes(data);
+                              }
+                              final loader = FontLoader("SFPro");
+                              loader.addFont(Future<ByteData>.value(ByteData.view(data.buffer)));
+                              await loader.load();
+                              fs.sfFontExistsOnDisk.value = true;
+                              showSnackbar("Notice", "SF Pro loaded");
+                            }
+                            if (kIsWeb || sfProFontUrl.isEmpty) {
+                              try {
+                                final res = await FilePicker.platform.pickFiles(withData: true, type: FileType.custom, allowedExtensions: ["ttf", "otf"]);
+                                if (res == null || res.files.isEmpty || res.files.first.bytes == null) return;
+                                await install(res.files.first.bytes!);
+                              } catch (e, stack) {
+                                Logger.error("Failed to load font!", error: e, trace: stack);
+                                showSnackbar("Error", "Failed to load font file. Please make sure it is a valid ttf.");
+                              }
+                              return;
+                            }
+                            try {
+                              final response = await http.downloadFromUrl(sfProFontUrl);
+                              if (response.statusCode == 200) {
+                                await install(response.data as Uint8List);
+                              } else {
+                                showSnackbar("Error", "Failed to fetch font");
+                              }
+                            } catch (e, stack) {
+                              Logger.error("Failed to fetch font!", error: e, trace: stack);
+                              showSnackbar("Error", "Failed to fetch font! Error: ${e.toString()}");
+                            }
+                          },
+                          title: kIsWeb || sfProFontUrl.isEmpty ? "Import SF Pro Font File" : "Download SF Pro Font",
+                          subtitle: "Apple's San Francisco, for the lyrics and the now-playing chip. Bricolage Grotesque stands in until it is loaded.",
+                        );
+                      }),
+                      Obx(() {
                         if (fs.fontExistsOnDisk.value) {
                           return SettingsTile(
                             onTap: () async {
@@ -685,6 +745,86 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
           ),
         ],
       )
+    );
+  }
+}
+
+
+/// now playing preview
+class _NowPlayingPreview extends StatelessWidget {
+  const _NowPlayingPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: cowMusic,
+      builder: (context, _) {
+        final np = cowMusic.current;
+        final dark = context.theme.brightness == Brightness.dark;
+        final onSurface = context.theme.colorScheme.onSurface;
+
+        if (np == null) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(Space.lg, Space.lg, Space.lg, Space.sm),
+            child: Row(
+              children: [
+                Icon(Icons.music_note_rounded, size: 20, color: onSurface.withOpacity(0.5)),
+                const SizedBox(width: Space.md),
+                Expanded(
+                  child: Text(
+                    "Nothing playing right now",
+                    style: CowType.secondary(context),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(Space.lg, Space.lg, Space.lg, Space.sm),
+          child: Row(
+            children: [
+              if (np.art != null)
+                ClipRRect(
+                  // concentric with the card
+                  borderRadius: BorderRadius.circular(GlassTokens.card - Space.lg),
+                  child: SizedBox(
+                    width: 52,
+                    height: 52,
+                    child: RawImage(image: np.art, fit: BoxFit.cover),
+                  ),
+                )
+              else
+                Icon(Icons.album_rounded, size: 40, color: onSurface.withOpacity(0.6)),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(np.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: CowType.name(context)),
+                    const SizedBox(height: 2),
+                    Text(np.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: CowType.secondary(context)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Space.md),
+              MusicBars(
+                color: onSurface.withOpacity(0.7),
+                colors: np.palette.display(dark: dark),
+                playing: cowMusic.isPlaying,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

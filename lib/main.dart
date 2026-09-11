@@ -51,6 +51,8 @@ import 'package:window_manager/window_manager.dart';
 import 'package:windows_taskbar/windows_taskbar.dart';
 import 'package:dpad/dpad.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:bluebubbles/utils/cow/music_background.dart';
+import 'package:bluebubbles/utils/cow/lyric_sheet.dart';
 
 var usingRustPush = true;
 bool isAuthing = false;
@@ -99,6 +101,8 @@ Future<Null> initApp(bool bubble, List<String> arguments) async {
 
         /* ----- MEDIAKIT INITIALIZATION ----- */
         MediaKit.ensureInitialized();
+        unawaited(warmUpMusicShader());
+        warmUpLyricType();
 
         /* ----- SPLASH SCREEN INITIALIZATION ----- */
         if (!ss.settings.finishedSetup.value && !kIsWeb && !kIsDesktop) {
@@ -140,7 +144,7 @@ Future<Null> initApp(bool bubble, List<String> arguments) async {
           /* ----- WINDOW INITIALIZATION ----- */
           await windowManager.ensureInitialized();
           await windowManager.setPreventClose(ss.settings.closeToTray.value);
-          await windowManager.setTitle('OpenBubbles');
+          await windowManager.setTitle('CowBubbles');
           await Window.initialize();
           if (Platform.isWindows) {
             await Window.hideWindowControls();
@@ -174,7 +178,7 @@ Future<Null> initApp(bool bubble, List<String> arguments) async {
             await ss.prefs.setDouble("window-x", posX);
             await ss.prefs.setDouble("window-y", posY);
 
-            await windowManager.setTitle('OpenBubbles');
+            await windowManager.setTitle('CowBubbles');
             if (arguments.firstOrNull != "minimized") {
               await windowManager.show();
             }
@@ -669,7 +673,7 @@ Future<void> initSystemTray() async {
   if (Platform.isWindows) {
     await systemTray.initSystemTray(
       iconPath: 'assets/icon/icon.ico',
-      toolTip: "OpenBubbles",
+      toolTip: "CowBubbles",
     );
   } else {
     String path;
