@@ -11,6 +11,10 @@ import 'package:get/get.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
+import 'package:bluebubbles/utils/cow/signature.dart';
+import 'package:bluebubbles/utils/cow/now_playing.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
+import 'package:bluebubbles/app/layouts/conversation_view/widgets/message/misc/tail_clipper.dart';
 
 class TextBubble extends CustomStateful<MessageWidgetController> {
   TextBubble({
@@ -76,6 +80,35 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
     super.initState();
   }
 
+  /// outgoing colour; album while playing, else the signature
+  Color _outgoingColor(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+
+    final np = cowMusic.current;
+    if (np != null) return np.palette.popColor(dark: dark);
+
+    final chat = controller.cvController?.chat;
+    if (chat == null) return context.theme.colorScheme.primary;
+    final handle = chat.participants.length == 1
+        ? chat.participants.first.address
+        : chat.guid;
+    return Signature.forHandle(handle, Theme.of(context).brightness).base;
+  }
+
+  /// incoming glass fill
+  List<Color> _glassIncoming(BuildContext context, bool translucent) {
+    final dark = context.theme.brightness == Brightness.dark;
+    if (ss.settings.colorfulBubbles.value) {
+      return getBubbleColors().map((c) => c.withOpacity(0.72)).toList();
+    }
+    final base = GlassTokens.fill(dark);
+    final sheen = GlassTokens.sheen(dark);
+    return [
+      Colors.white.withOpacity(base),
+      Colors.white.withOpacity((base + sheen * 0.5).clamp(0.0, 1.0)),
+    ];
+  }
+
   List<Color> getBubbleColors() {
     if (selected && !iOS) return [context.theme.colorScheme.tertiaryContainer, context.theme.colorScheme.tertiaryContainer];
     List<Color> bubbleColors = [context.theme.colorScheme.properSurface, context.theme.colorScheme.properSurface];
@@ -111,7 +144,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
   Widget build(BuildContext context) {
     return Obx(() {
       var translucentMode = controller.cvController?.backgroundPoster.value != null;
-      var child = Container(
+      Widget child = Container(
         constraints: BoxConstraints(
           maxWidth: message.isBigEmoji ? ns.width(context) : ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40 - (message.dateScheduled != null ? 4 : 0),
           minHeight: 40 - (message.dateScheduled != null ? 4 : 0),
@@ -121,14 +154,17 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
             left: message.dateScheduled != null && message.isBigEmoji ? -8 : message.isFromMe! || message.isBigEmoji ? 0 : 10,
             right: message.isFromMe! && (!message.isBigEmoji) ? 10 : 0
           )),
+        // only this side is tinted
         color: message.isFromMe! && !message.isBigEmoji && message.dateScheduled == null
-            ? (selected ? context.theme.colorScheme.tertiaryContainer : context.theme.colorScheme.primary)
+            ? (selected
+                ? context.theme.colorScheme.tertiaryContainer
+                : _outgoingColor(context))
             : null,
         decoration: message.isFromMe! || message.isBigEmoji ? null : BoxDecoration(
           gradient: LinearGradient(
             begin: AlignmentDirectional.bottomCenter,
             end: AlignmentDirectional.topCenter,
-            colors: getBubbleColors().map((c) => c.withOpacity(translucentMode ? 0.7 : 1)).toList(),
+            colors: _glassIncoming(context, translucentMode),
           ),
         ),
         // alignment: Alignment.center,
@@ -201,6 +237,18 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
           }
         ),
       );
+      // a border would be clipped on the curves
+      if (!message.isFromMe! && !message.isBigEmoji) {
+        final dark = context.theme.brightness == Brightness.dark;
+        child = CustomPaint(
+          foregroundPainter: BubbleRimPainter(
+            isFromMe: false,
+            top: Colors.white.withOpacity(GlassTokens.rimTop(dark) * 0.7),
+            bottom: Colors.white.withOpacity(GlassTokens.rimBottom(dark) * 0.7),
+          ),
+          child: child,
+        );
+      }
       if (translucentMode) {
         return BackdropFilter(
           filter: ImageFilter.compose(

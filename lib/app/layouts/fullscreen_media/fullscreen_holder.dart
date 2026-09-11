@@ -14,6 +14,7 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:get/get.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class FullscreenMediaHolder extends StatefulWidget {
   FullscreenMediaHolder({
@@ -119,7 +120,14 @@ class FullscreenMediaHolderState extends OptimizedState<FullscreenMediaHolder> {
                             .copyWith(color: context.theme.colorScheme.properOnSurface)),
                     centerTitle: iOS,
                     iconTheme: IconThemeData(color: context.theme.colorScheme.primary),
-                    backgroundColor: context.theme.colorScheme.properSurface,
+                    // A translucent bar, not a blurred one: a BackdropFilter here
+                    // would sample the video underneath on every frame. The rim
+                    // and sheen give the glass read without the cost.
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    flexibleSpace: const RepaintBoundary(
+                      child: GlassFill(radius: 0, fillAlpha: 0.35, child: SizedBox.expand()),
+                    ),
                     systemOverlayStyle: context.theme.colorScheme.brightness == Brightness.dark
                         ? SystemUiOverlayStyle.light
                         : SystemUiOverlayStyle.dark,

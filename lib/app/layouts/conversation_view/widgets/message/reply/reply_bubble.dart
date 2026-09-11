@@ -7,7 +7,7 @@ import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
-import 'package:faker/faker.dart' hide Color;
+import 'package:bluebubbles/utils/cow/cow_redact.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,7 +55,7 @@ class _ReplyBubbleState extends CustomState<ReplyBubble, void, MessageWidgetCont
     if (!iOS) {
       String text = MessageHelper.getNotificationText(message);
       if (ss.settings.redactedMode.value && ss.settings.hideMessageContent.value) {
-        text = faker.lorem.words(text.split(" ").length).join(" ");
+        text = CowRedact.text(text, text.split(" ").length);
       }
       return MouseRegion(
         cursor: SystemMouseCursors.click,

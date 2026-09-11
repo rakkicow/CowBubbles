@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/cupertino_header.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/material_header.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/text_field/conversation_text_field.dart';
@@ -15,6 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_acrylic/window_effect.dart';
 import 'package:get/get.dart';
+import 'package:bluebubbles/utils/cow/music_background.dart';
+import 'package:bluebubbles/utils/cow/now_playing.dart';
+import 'package:bluebubbles/utils/cow/tokens.dart';
+import 'package:bluebubbles/utils/cow/lyric_sheet.dart';
+import 'package:bluebubbles/app/layouts/conversation_view/widgets/profile_banners.dart';
 
 class ConversationView extends StatefulWidget {
   ConversationView({
@@ -35,6 +41,9 @@ class ConversationView extends StatefulWidget {
 }
 
 class ConversationViewState extends OptimizedState<ConversationView> {
+  /// lyric sheet; back closes it before the view pops
+  final LyricSheetController _lyricSheet = LyricSheetController();
+
   late final ConversationViewController controller = cvc(chat, tag: widget.customService?.tag);
 
   Chat get chat => widget.chat;
@@ -58,9 +67,16 @@ class ConversationViewState extends OptimizedState<ConversationView> {
 
   @override
   void dispose() {
+    _lyricSheet.dispose();
     controller.saveReplyToMessageState(); // P8bda
     super.dispose();
   }
+
+  /// header height, no status bar or chip
+  double get _headerBase =>
+      (kIsDesktop ? (!iOS ? 25 : 5) : 0) +
+      90 * (iOS ? ss.settings.avatarScale.value : 0) +
+      (!iOS ? kToolbarHeight : 0);
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +109,10 @@ class ConversationViewState extends OptimizedState<ConversationView> {
           canPop: false,
           onPopInvoked: (didPop) async {
             if (didPop) return;
+            if (_lyricSheet.isOpen) {
+              _lyricSheet.close();
+              return;
+            }
             if (controller.inSelectMode.value) {
               controller.inSelectMode.value = false;
               controller.selected.clear();
@@ -113,14 +133,48 @@ class ConversationViewState extends OptimizedState<ConversationView> {
           child: SafeArea(
             top: false,
             bottom: false,
-            child: Scaffold(
-              backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled ? Colors.transparent : context.theme.colorScheme.background,
+            child: _MusicBackdrop(
+              lyricSheet: _lyricSheet,
+              chipBottom: _headerBase + MediaQuery.paddingOf(context).top + _chipHeight,
+              builder: (context, lyricSheet) => Scaffold(
+              // transparent so the artwork shows through
+              backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled || cowMusic.current != null
+                  ? Colors.transparent
+                  : context.theme.colorScheme.background,
               extendBodyBehindAppBar: true,
               appBar: PreferredSize(
-                  preferredSize: Size(ns.width(context), ((kIsDesktop ? (!iOS ? 25 : 5) : 0) + 90 * (iOS ? ss.settings.avatarScale.value : 0) + (!iOS ? kToolbarHeight : 0) + (controller.suggestedContact.value != null || controller.suggestShare.value ? 68 : 0))),
-                  child: iOS
-                  ? CupertinoHeader(controller: controller)
-                  : MaterialHeader(controller: controller) as PreferredSizeWidget),
+                  // chip counts toward the app bar height
+                  preferredSize: Size(ns.width(context), _headerBase + (cowMusic.current != null ? _chipHeight : 0)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // header fills the app bar, status bar included
+                      SizedBox(
+                        height: _headerBase + MediaQuery.paddingOf(context).top,
+                        child: iOS
+                            ? CupertinoHeader(controller: controller)
+                            : MaterialHeader(controller: controller),
+                      ),
+                      if (cowMusic.current != null)
+                        SizedBox(
+                          height: _chipHeight,
+                          child: NowPlayingChip(
+                            title: cowMusic.current!.title,
+                            artist: cowMusic.current!.artist,
+                            art: cowMusic.current!.art,
+                            waveColors: cowMusic.current!.palette.display(
+                                dark: Theme.of(context).brightness == Brightness.dark),
+                            playing: cowMusic.isPlaying,
+                            onTap: cowMusic.playPause,
+                            onNext: cowMusic.next,
+                            onPrevious: cowMusic.previous,
+                            onHoldStart: lyricSheet.hold,
+                            onHoldMove: lyricSheet.holdMove,
+                            onHoldEnd: lyricSheet.release,
+                          ),
+                        ),
+                    ],
+                  )),
               body: Actions(
                 actions: {
                   if (ss.settings.enablePrivateAPI.value)
@@ -208,6 +262,7 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                                 ],
                               ),
                             ),
+                            ProfileBanners(controller: controller),
                             Stack(
                               children: [
                                 Align(
@@ -240,10 +295,82 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                   ),
                 ),
               ),
-            )),
+            ))),
           ),
         )
       ),
+    );
+  }
+}
+
+
+/// now-playing chip height
+const double _chipHeight = 56;
+
+/// paints the song's artwork behind the conversation
+class _MusicBackdrop extends StatefulWidget {
+  /// built inside the listener
+  final Widget Function(BuildContext context, LyricSheetController lyricSheet) builder;
+
+  final LyricSheetController lyricSheet;
+
+  /// where the chip ends
+  final double chipBottom;
+
+  const _MusicBackdrop({required this.builder, required this.lyricSheet, required this.chipBottom});
+
+  @override
+  State<_MusicBackdrop> createState() => _MusicBackdropState();
+}
+
+class _MusicBackdropState extends State<_MusicBackdrop> {
+  /// last track; held while the sheet closes
+  NowPlaying? _shown;
+  Timer? _clear;
+
+  @override
+  void dispose() {
+    _clear?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: cowMusic,
+      builder: (context, _) {
+        final np = cowMusic.current;
+        if (np != null) {
+          _shown = np;
+          _clear?.cancel();
+          _clear = null;
+        } else if (_shown != null && _clear == null) {
+          // song ended under an open sheet
+          if (widget.lyricSheet.isOpen) {
+            WidgetsBinding.instance.addPostFrameCallback((_) => widget.lyricSheet.close());
+          }
+          _clear = Timer(Motion.slow + Motion.base, () {
+            if (mounted) setState(() => _shown = null);
+          });
+        }
+        final shown = _shown;
+        final child = widget.builder(context, widget.lyricSheet);
+        // sheet always last, conversation always inside
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            if (shown != null) MusicBackground(palette: shown.palette, art: shown.blurSource),
+            // own layer
+            LyricSheet(
+              controller: widget.lyricSheet,
+              track: shown,
+              playing: cowMusic.isPlaying,
+              peekTop: widget.chipBottom,
+              child: RepaintBoundary(child: child),
+            ),
+          ],
+        );
+      },
     );
   }
 }

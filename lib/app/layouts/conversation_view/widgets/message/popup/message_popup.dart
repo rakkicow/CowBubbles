@@ -45,6 +45,7 @@ import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:universal_io/io.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class MessagePopup extends StatefulWidget {
   final Offset childPosition;
@@ -361,7 +362,15 @@ class _MessagePopupState extends OptimizedState<MessagePopup> with SingleTickerP
                                     filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                                     child: Container(
                                       padding: const EdgeInsets.all(5).add(const EdgeInsets.only(bottom: 15)),
-                                      color: context.theme.colorScheme.properSurface.lightenOrDarken(iOS ? 0 : 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(GlassTokens.fill(
+                                            context.theme.brightness == Brightness.dark) + 0.06),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(GlassTokens.rimTop(
+                                              context.theme.brightness == Brightness.dark) * 0.8),
+                                          width: 1,
+                                        ),
+                                      ),
                                       width: emojiPickerSize.toDouble(),
                                       child: ShaderMask(
                                         shaderCallback: (Rect rect) {
@@ -474,7 +483,8 @@ class _MessagePopupState extends OptimizedState<MessagePopup> with SingleTickerP
                               : ClipPath(
                           clipper: ReactionClipper(isFromMe: message.isFromMe!),
                           child: Material(
-                            color: context.theme.colorScheme.properSurface,
+                            color: Colors.white.withOpacity(GlassTokens.fill(
+                                context.theme.brightness == Brightness.dark) + 0.10),
                             child: Container(
                               width: iosSize,
                               height: iosSize,
@@ -939,13 +949,13 @@ class _MessagePopupState extends OptimizedState<MessagePopup> with SingleTickerP
     if (part.attachments.isNotEmpty && !message.isLegacyUrlPreview && !kIsWeb && !kIsDesktop) {
       for (Attachment? element in part.attachments) {
         Share.file(
-          "${element!.mimeType!.split("/")[0].capitalizeFirst} shared from OpenBubbles: ${element.transferName}",
+          "${element!.mimeType!.split("/")[0].capitalizeFirst} shared from CowBubbles: ${element.transferName}",
           element.path,
         );
       }
     } else if (part.text!.isNotEmpty) {
       Share.text(
-        "Text shared from OpenBubbles",
+        "Text shared from CowBubbles",
         part.text!,
       );
     }

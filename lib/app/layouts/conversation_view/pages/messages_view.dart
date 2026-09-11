@@ -493,7 +493,8 @@ class MessagesViewState extends OptimizedState<MessagesView> {
                       reverse: true,
                       controller: scrollController,
                       showScrollbar: true,
-                      child: CustomScrollView(
+                      child: RepaintBoundary(
+                        child: CustomScrollView(
                         controller: scrollController,
                         reverse: true,
                         physics: ThemeSwitcher.getScrollPhysics(),
@@ -828,7 +829,7 @@ class MessagesViewState extends OptimizedState<MessagesView> {
                             padding: EdgeInsets.all(70),
                           ),
                         ],
-                      ),
+                      )),
                     ),
                   ),
                 ),

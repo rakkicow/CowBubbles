@@ -42,6 +42,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:tuple/tuple.dart';
 import 'package:universal_io/io.dart';
+import 'package:bluebubbles/utils/cow/now_playing.dart';
+import 'package:bluebubbles/utils/cow/music_background.dart';
+import 'package:bluebubbles/utils/cow/glass.dart';
 
 class ConversationTextField extends CustomStateful<ConversationViewController> {
   ConversationTextField({
@@ -587,11 +590,13 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                                                     ),
                                                     decoration: BoxDecoration(
                                                       border: Border.fromBorderSide(BorderSide(
-                                                        color: context.theme.colorScheme.outline,
+                                                        color: Colors.white.withOpacity(GlassTokens.rimTop(
+                                                            context.theme.brightness == Brightness.dark)),
                                                         width: 1,
                                                       )),
-                                                      borderRadius: BorderRadius.circular(20),
-                                                      color: context.theme.colorScheme.properSurface,
+                                                      borderRadius: BorderRadius.circular(GlassTokens.card),
+                                                      color: Colors.white.withOpacity(GlassTokens.fill(
+                                                          context.theme.brightness == Brightness.dark)),
                                                     ),
                                                   );
                                                 })
@@ -762,7 +767,7 @@ class OptionalBackdrop extends StatelessWidget {
                   CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark ? darkMatrix : lightMatrix,
                 )),
             child: Container(
-              color: context.theme.colorScheme.properSurface.withOpacity(translucentMode ? 0.7 : 1),
+              color: Colors.transparent,
               child: child,
             )
           ),
@@ -810,7 +815,27 @@ class TextFieldComponentState extends State<TextFieldComponent> {
   late final Future<void> Function({String? effect}) sendMessage;
 
   late final ValueNotifier<bool> isRecordingNotifier;
-  TextFieldComponentState() : isRecordingNotifier = ValueNotifier<bool>(false);
+
+  /// empty/non-empty only; per-keystroke rebuilds kill the keyboard
+  late final ValueNotifier<bool> hasTextNotifier;
+  TextEditingController? _watchedController;
+
+  TextFieldComponentState()
+      : isRecordingNotifier = ValueNotifier<bool>(false),
+        hasTextNotifier = ValueNotifier<bool>(false);
+
+  void _watchText(TextEditingController c) {
+    if (identical(_watchedController, c)) return;
+    _watchedController?.removeListener(_onTextChanged);
+    _watchedController = c;
+    c.addListener(_onTextChanged);
+    _onTextChanged();
+  }
+
+  void _onTextChanged() {
+    final has = _watchedController?.text.isNotEmpty ?? false;
+    if (hasTextNotifier.value != has) hasTextNotifier.value = has;
+  }
 
   @override
   void initState() {
@@ -835,6 +860,8 @@ class TextFieldComponentState extends State<TextFieldComponent> {
   void dispose() {
     // dispose of the ValueNotifier when the state is disposed
     isRecordingNotifier.dispose();
+    _watchedController?.removeListener(_onTextChanged);
+    hasTextNotifier.dispose();
     super.dispose();
   }
 
@@ -849,6 +876,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
   @override
   Widget build(BuildContext context) {
     final txtController = controller?.textController ?? textController;
+    _watchText(txtController);
     final subjController = controller?.subjectTextController ?? subjectTextController;
     return Focus(
       onKeyEvent: (_, ev) => handleKey(_, ev, context, isChatCreator),
@@ -857,19 +885,29 @@ class TextFieldComponentState extends State<TextFieldComponent> {
         child: ValueListenableBuilder<bool>(
         valueListenable: isRecordingNotifier,
         builder: (context, isRecording, child) {
+        // glass capsule; Border can't vary, so the sheen does the top-lit read
         return Container(
-          decoration: iOS
-              ? BoxDecoration(
-                  border: Border.fromBorderSide(BorderSide(
-                    color: (isRecording & iOS) ? context.theme.colorScheme.primary.withOpacity(1.0) : context.theme.colorScheme.properSurface,
-                    width: 1.5,
-                  )),
-                  borderRadius: BorderRadius.circular(20),
-                )
-              : BoxDecoration(
-                  color: context.theme.colorScheme.properSurface,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(GlassTokens.fill(
+                context.theme.brightness == Brightness.dark)),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.center,
+              colors: [
+                Colors.white.withOpacity(GlassTokens.sheen(
+                    context.theme.brightness == Brightness.dark)),
+                Colors.white.withOpacity(0),
+              ],
+            ),
+            border: Border.fromBorderSide(BorderSide(
+              color: (isRecording & iOS)
+                  ? context.theme.colorScheme.primary
+                  : Colors.white.withOpacity(GlassTokens.rimTop(
+                      context.theme.brightness == Brightness.dark)),
+              width: (isRecording & iOS) ? 1.5 : 1,
+            )),
+            borderRadius: BorderRadius.circular(GlassTokens.card),
+          ),
           clipBehavior: Clip.antiAlias,
           child: AnimatedSize(
             duration: const Duration(milliseconds: 400),
@@ -945,7 +983,14 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                   ),
                 CallbackShortcuts(
                   bindings: txtController.getShortcuts(),
-                  child: TextField(
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: cowMusic.lyricLine,
+                    builder: (context, lyric, _) => ValueListenableBuilder<bool>(
+                      valueListenable: hasTextNotifier,
+                      builder: (context, hasText, __) => Stack(
+                      alignment: AlignmentDirectional.centerStart,
+                      children: [
+                        TextField(
                     textCapitalization: TextCapitalization.sentences,
                     focusNode: controller?.focusNode ?? focusNode,
                     autocorrect: true,
@@ -958,20 +1003,28 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                     autofocus: (kIsWeb || kIsDesktop) && !isChatCreator,
                     enableIMEPersonalizedLearning: !ss.settings.incognitoKeyboard.value,
                     textInputAction: ss.settings.sendWithReturn.value && !kIsWeb && !kIsDesktop ? TextInputAction.send : TextInputAction.newline,
+                    // no caret beside a lyric
+                    showCursor: hasText ||
+                        (lyric == null && !cowMusic.lyricInterval.value),
                     cursorColor: context.theme.colorScheme.primary,
                     cursorHeight: context.theme.extension<BubbleText>()!.bubbleText.fontSize! * 1.25,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.all(iOS && !kIsDesktop && !kIsWeb ? 10 : 12.5),
                       isDense: true,
                       isCollapsed: true,
+                      // lyric as the placeholder while playing
                       hintText: isChatCreator
                           ? "New Message"
                           : ss.settings.recipientAsPlaceholder.value == true
                               ? isRecording ? "" : chat!.getTitle()
-                              : (chat!.isTextForwarding && !isRecording)
-                                  ? "Text Message"
-                                  : (!isRecording) // Only show iMessage when not recording
-                                    ? "iMessage" : "",
+                              : (isRecording)
+                                  ? ""
+                                  : (lyric ??
+                                      (cowMusic.lyricInterval.value
+                                          ? ""
+                                          : chat!.isTextForwarding
+                                              ? "Text Message"
+                                              : "iMessage")),
                       enabledBorder: InputBorder.none,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -1004,6 +1057,36 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                     },
                     contentInsertionConfiguration: ContentInsertionConfiguration(onContentInserted: onContentCommit),
                   ),
+                        // instrumental stretch only; sibling overlay, so watch the controller
+                        if (cowMusic.lyricInterval.value && !isRecording)
+                          ListenableBuilder(
+                            listenable: txtController,
+                            builder: (context, _) => txtController.text.isEmpty
+                                ? IgnorePointer(
+                                    child: Padding(
+                                      padding: EdgeInsetsDirectional.only(
+                                          start: iOS && !kIsDesktop && !kIsWeb
+                                              ? 10
+                                              : 12.5),
+                                      // dots when the span is known, wave while loading
+                                      child: Builder(builder: (context) {
+                                        final iv = cowMusic.currentInterval;
+                                        final color = context.theme.colorScheme.outline;
+                                        return iv == null
+                                            ? LyricDots(color: color)
+                                            : IntervalDots(
+                                                color: color,
+                                                start: iv.start,
+                                                end: iv.end,
+                                                size: 7,
+                                              );
+                                      }),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                      ],
+                    ))),
                 ),
               ],
             ),),
